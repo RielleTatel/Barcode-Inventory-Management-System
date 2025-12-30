@@ -7,7 +7,10 @@ import {
     Package,
     UtensilsCrossed,
     Truck, 
-    Settings, 
+    Settings,
+    Beef, 
+    Soup, 
+    UtensilsCrossedIcon, 
     LogOut 
 } from 'lucide-react'; 
 
@@ -18,9 +21,9 @@ const Navbar = () => {
 
     const navItems = [
         { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { path: "/dashboard", label: "DashboardPage1", icon: LayoutDashboard },
-        { path: "/dashboard", label: "DashboardPage2", icon: LayoutDashboard },
-        { path: "/dashboard", label: "DashboardPage3", icon: LayoutDashboard },
+        { path: "/dashboard", label: "DashboardPage1", icon: Beef, variant: "highlighted" },
+        { path: "/dashboard", label: "DashboardPage2", icon: UtensilsCrossedIcon, variant: "highlighted" },
+        { path: "/dashboard", label: "DashboardPage3", icon: Soup, variant: "highlighted" },
         { path: "/inventory", label: "Inventory", icon: Package },
         { path: "/catering", label: "Catering", icon: ChefHat },
         { path: "/menus-recipes", label: "Menus & Recipes", icon: UtensilsCrossed },
@@ -57,15 +60,18 @@ const Navbar = () => {
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = activeTab === item.path;
+                        const isHighlighted = item.variant === "highlighted"; 
                         
                         return (
                             <NavLink
                                 key={item.path}
                                 to={item.path}
                                 onClick={() => handleNavClick(item.path)}
-                                className={`text-[13px] w-full h-[45px] rounded-[14px] flex justify-start items-center gap-x-3 hover:bg-text-highlight hover:text-white hover:shadow-md transition-all cursor-pointer ${
-                                    isActive ? "bg-text-highlight text-white shadow-md" : "bg-transparent"
-                                }`}
+                                className={`text-[13px] w-full h-[45px] rounded-[14px] flex justify-start items-center gap-x-3 hover:bg-text-highlight hover:text-white hover:shadow-md transition-all cursor-pointer 
+                                  ${isHighlighted && "ml-5"}
+                                  ${isActive && "bg-text-highlight text-white shadow-md"}
+                                  ${!isActive && "hover:bg-text-highlight hover:text-white hover:shadow-md"}
+                                `}
                             >
                                 <Icon
                                     className={`ml-7 w-4 h-4 transition-colors ${
