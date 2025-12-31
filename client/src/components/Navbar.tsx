@@ -26,10 +26,10 @@ const Navbar = () => {
     ];
 
     return (
-        <div className="h-full min-h-[770px] w-[280px] bg-white rounded-[40px] p-5 flex flex-col gap-1 font-sans text-text-color">
+        <div className="h-full min-h-HeightInner-container w-70 bg-white rounded-[40px] p-5 flex flex-col gap-1 font-sans text-text-color">
 
             {/* Profile Section */}
-            <div className="w-full bg-inner-background h-[100px] rounded-[10px] flex flex-row items-center px-2 gap-1 justify-center"> 
+            <div className="w-full bg-inner-background h-25 rounded-[10px] flex flex-row items-center px-2 gap-1 justify-center"> 
                 <div className="w-15 h-15 rounded-full bg-white flex items-center justify-center overflow-hidden"> 
                     <img src="" alt="" className="w-full h-full "/> 
                 </div> 
@@ -59,7 +59,7 @@ const Navbar = () => {
                                 end={item.path === "/"}
                               >
                                 {({ isActive }) => (
-                                    <div className={`group text-[13px] w-full h-[45px] rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer 
+                                    <div className={`group text-[13px] w-full h-11.25 rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer 
                                       ${isActive ? "bg-text-highlight text-white shadow-md" : "hover:bg-text-highlight hover:shadow-md"}
                                     `}>
                                         <Icon
@@ -93,27 +93,52 @@ const Navbar = () => {
                 <div className="flex flex-col gap-1">
                     <NavLink
                         to="/settings"
-                        className={({ isActive }) => `text-[13px] w-full h-[45px] rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer ${
-                            isActive ? "bg-text-highlight text-white shadow-md" : "bg-transparent hover:bg-text-highlight hover:text-white hover:shadow-md"
-                        }`}
+                    >
+
+                        {({ isActive }) => (
+                          <div className={`group text-[13px] w-full h-11.25 rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer 
+                              ${isActive ? "bg-text-highlight text-white shadow-md" : "hover:bg-text-highlight hover:shadow-md"} 
+                          `}> 
+                            <Settings
+                                className={`ml-7 w-4 h-4 transition-colors 
+                                    ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
+                                `}
+                            /> 
+                            <p
+                                className={`font-semibold transition-colors 
+                                    ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
+                                `}
+                            >
+                                Settings
+                            </p>
+                          </div>
+                        )} 
+                    </NavLink> 
+                    
+                    <NavLink
+                        to="/Logout"
                     >
                         {({ isActive }) => (
-                            <>
-                                <Settings
-                                    className={`ml-7 w-4 h-4 transition-colors ${
-                                        isActive ? "text-white" : "text-text-color"
-                                    }`}
-                                /> 
-                                <p
-                                    className={`font-semibold transition-colors ${
-                                        isActive ? "text-white" : "text-text-color"
-                                    }`}
-                                >
-                                    Settings
-                                </p>
-                            </>
-                        )}
-                    </NavLink>
+                          <div className={`group text-[13px] w-full h-11.25 rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer 
+                              ${isActive ? "bg-text-highlight text-white shadow-md" : "hover:bg-text-highlight hover:shadow-md"} 
+                          `}> 
+                            <LogOut
+                                className={`ml-7 w-4 h-4 transition-colors 
+                                    ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
+                                `}
+                            /> 
+                            <p
+                                className={`font-semibold transition-colors 
+                                    ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
+                                `}
+                            >
+                                Logout
+                            </p>
+                          </div>
+                        )} 
+                    </NavLink> 
+                    
+
                 </div>
             </nav> 
         </div>
