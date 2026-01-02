@@ -2,7 +2,7 @@
 const Settings = () => {
     return (
         <>
-        
+            <h1> adasds </h1>
         </>
     )
 }
