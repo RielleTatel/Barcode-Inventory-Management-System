@@ -1,6 +1,10 @@
+import { useState } from "react"
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
+import { InventoryTabs } from "@/components/ui/tabs"; 
+
 import {
   Select,
   SelectContent,
@@ -22,6 +26,9 @@ import {
 } from "@/components/ui/table"
 
 const Inventory = () => {
+
+const [activeTab, setActiveTab] = useState("inventory");
+
   return (
     <div className="flex flex-col h-full w-full gap-y-4">
 
@@ -34,8 +41,14 @@ const Inventory = () => {
       <div className="flex gap-3 items-center">
         <Button variant="outline">Export</Button>
         <Button>Add Product</Button>
-      </div> 
-    </div>
+      </div>  
+    </div>  
+
+      <InventoryTabs
+        activeTab={activeTab}
+        onChange={setActiveTab}
+      />
+
 
       <div className="bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4">
 
