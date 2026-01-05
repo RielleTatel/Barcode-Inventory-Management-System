@@ -1,9 +1,10 @@
+import KpiCard from "@/components/dashboard-components/KpiCards"
 
 const DashboardPage1 = () => {
     return (
-        <div> 
-            
-        </div>
+      <div>
+        <KpiCard/> 
+      </div>
     )
 }
 
