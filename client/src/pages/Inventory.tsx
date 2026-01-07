@@ -1,10 +1,9 @@
 import { useState } from "react"
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
 import { InventoryTabs } from "@/components/ui/tabs"; 
-
+import type { stockData } from "@/components/inventory-components";
 import {
   Select,
   SelectContent,
@@ -23,18 +22,40 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table" 
 
-const Inventory = () => {
+const Inventory = () => { 
 
-const [activeTab, setActiveTab] = useState("inventory");
+const mockData: stockData[] = [
+  {
+    sku: 1,
+    itemName: "Item 1",
+    category: "Category A",
+    stockLevel: 50,
+    unit: 10,
+    status: "In Stock",
+    actions: () => { console.log("Editing") }
+  },
+  {
+    sku: 2,
+    itemName: "Item 2",
+    category: "Category B",
+    stockLevel: 0,
+    unit: 5,
+    status: "Out of Stock",
+    actions: () => { console.log("Editing") }
+  },
+]
+
+
+const [activeTab, setActiveTab] = useState<string>("inventory");
 
   return (
-    <div className="flex flex-col h-full w-full gap-y-4">
+    <div className="flex flex-col h-full w-full gap-y-6">
 
     <div className="rounded-xl p-2 flex gap-x-7">
       <div className="flex flex-col">
-        <p className="text-[32px] font-bold">Inventory</p> 
+        <p className="text-[32px] font-bold"> Inventory </p> 
         <p className="text-md">Manage Your Inventory </p> 
       </div>
 
@@ -49,8 +70,7 @@ const [activeTab, setActiveTab] = useState("inventory");
         onChange={setActiveTab}
       />
 
-
-      <div className="bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4">
+      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4">
 
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div className="flex gap-2">
@@ -60,7 +80,7 @@ const [activeTab, setActiveTab] = useState("inventory");
 
           <div className="flex gap-3">
             <Select>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <SelectValue placeholder="Branch" />
               </SelectTrigger>
               <SelectContent>
@@ -73,7 +93,7 @@ const [activeTab, setActiveTab] = useState("inventory");
             </Select>
 
             <Select>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-35">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -85,7 +105,7 @@ const [activeTab, setActiveTab] = useState("inventory");
             </Select>
 
             <Select>
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-30">
                 <SelectValue placeholder="Stock" />
               </SelectTrigger>
               <SelectContent>
@@ -103,7 +123,7 @@ const [activeTab, setActiveTab] = useState("inventory");
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40px]">
+                <TableHead className="w-10">
                   <Checkbox />
                 </TableHead>
                 <TableHead>SKU</TableHead>
@@ -116,46 +136,30 @@ const [activeTab, setActiveTab] = useState("inventory");
               </TableRow>
             </TableHeader>
 
-            <TableBody>
-              <TableRow>
-                <TableCell>
-                  <Checkbox />
-                </TableCell>
-                <TableCell className="font-mono">SKU-001</TableCell>
-                <TableCell>Chicken Breast</TableCell>
-                <TableCell>Raw Ingredients</TableCell>
-                <TableCell>120</TableCell>
-                <TableCell>kg</TableCell>
-                <TableCell>
-                  <span className="text-green-600 font-medium">In Stock</span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <Checkbox />
-                </TableCell>
-                <TableCell className="font-mono">SKU-002</TableCell>
-                <TableCell>Cooking Oil</TableCell>
-                <TableCell>Raw Ingredients</TableCell>
-                <TableCell>8</TableCell>
-                <TableCell>L</TableCell>
-                <TableCell>
-                  <span className="text-red-600 font-medium">Low Stock</span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
+            <TableBody> 
+                {mockData.map(data => (
+                  <TableRow>
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell className="font-mono">{data.sku}</TableCell>
+                    <TableCell>{data.itemName}</TableCell>
+                    <TableCell>{data.category}</TableCell>
+                    <TableCell>{data.stockLevel}</TableCell>
+                    <TableCell>{data.unit}</TableCell>
+                    <TableCell>
+                      <span className="text-green-600 font-medium">{data.status}</span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm">
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
-          </Table>
+          </Table> 
+
         </div>
       </div>
     </div>
