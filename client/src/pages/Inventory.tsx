@@ -25,31 +25,28 @@ import {
 } from "@/components/ui/table" 
 
 const Inventory = () => { 
-
-const mockData: stockData[] = [
-  {
-    sku: 1,
-    itemName: "Item 1",
-    category: "Category A",
-    stockLevel: 50,
-    unit: 10,
-    status: "In Stock",
-    actions: () => { console.log("Editing") }
-  },
-  {
-    sku: 2,
-    itemName: "Item 2",
-    category: "Category B",
-    stockLevel: 0,
-    unit: 5,
-    status: "Out of Stock",
-    actions: () => { console.log("Editing") }
-  },
-]
-
+  const mockData: stockData[] = [
+    {
+      sku: 1,
+      itemName: "Item 1",
+      category: "Category A",
+      stockLevel: 50,
+      unit: 10,
+      status: "In Stock",
+      actions: () => { console.log("Editing") }
+    },
+    {
+      sku: 2,
+      itemName: "Item 2",
+      category: "Category B",
+      stockLevel: 0,
+      unit: 5,
+      status: "Out of Stock",
+      actions: () => { console.log("Editing") }
+    },
+  ]
 
 const [activeTab, setActiveTab] = useState<string>("inventory");
-
   return (
     <div className="flex flex-col h-full w-full gap-y-6">
 
@@ -118,6 +115,7 @@ const [activeTab, setActiveTab] = useState<string>("inventory");
             </Select>
           </div>
         </div>
+        
 
         <div className="rounded-md border">
           <Table>
