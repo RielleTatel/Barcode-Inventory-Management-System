@@ -7,12 +7,11 @@ const Mainlayout = () => {
       <div
         className="rounded-2xl bg-inner-background w-full min-h-HeightInner-container
         p-7 shadow-[0_0_30px_0_rgba(0,0,0,0.12)]
-        flex flex-row gap-3"
+        flex flex-row gap-3 items-stretch"
       >
         <Navbar />
 
-        {/* IMPORTANT */}
-        <main className="flex-1 h-full flex">
+        <main className="flex-1 flex">
           <Outlet />
         </main>
       </div>

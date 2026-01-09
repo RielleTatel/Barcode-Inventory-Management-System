@@ -34,3 +34,4 @@ export interface ActiveSupplier {
   leadTime: string;
   status: "Active" | "Inactive";
 }
+

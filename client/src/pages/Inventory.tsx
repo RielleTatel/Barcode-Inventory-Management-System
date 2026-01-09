@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
 import { InventoryTabs } from "@/components/ui/tabs"; 
 import type { stockData } from "@/components/inventory-components";
+import { Pencil, Eye, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -149,9 +150,29 @@ const [activeTab, setActiveTab] = useState<string>("inventory");
                       <span className="text-green-600 font-medium">{data.status}</span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Edit
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => console.log('View', data.sku)}
+                          className="p-1 hover:bg-gray-100 rounded"
+                          title="View"
+                        >
+                          <Eye className="w-4 h-4 text-blue-600" />
+                        </button>
+                        <button
+                          onClick={() => console.log('Edit', data.sku)}
+                          className="p-1 hover:bg-gray-100 rounded"
+                          title="Edit"
+                        >
+                          <Pencil className="w-4 h-4 text-green-600" />
+                        </button>
+                        <button
+                          onClick={() => console.log('Delete', data.sku)}
+                          className="p-1 hover:bg-gray-100 rounded"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

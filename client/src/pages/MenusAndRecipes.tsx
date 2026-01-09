@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
+import { Pencil, Eye, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,50 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table" 
+
+interface MenuItem {
+  sku: string;
+  itemName: string;
+  category: string;
+  price: number;
+  unit: string;
+  availability: string;
+}
+
+const mockMenuData: MenuItem[] = [
+  {
+    sku: "MENU-001",
+    itemName: "Beef Wellington",
+    category: "Main Course",
+    price: 450.00,
+    unit: "serving",
+    availability: "Available"
+  },
+  {
+    sku: "MENU-002",
+    itemName: "Caesar Salad",
+    category: "Appetizer",
+    price: 180.00,
+    unit: "serving",
+    availability: "Available"
+  },
+  {
+    sku: "MENU-003",
+    itemName: "Chocolate Lava Cake",
+    category: "Dessert",
+    price: 220.00,
+    unit: "piece",
+    availability: "Available"
+  },
+  {
+    sku: "MENU-004",
+    itemName: "Grilled Salmon",
+    category: "Main Course",
+    price: 520.00,
+    unit: "serving",
+    availability: "Out of Stock"
+  },
+];
 
 const MenusAndRecipes = () => { 
 
@@ -69,15 +114,63 @@ const MenusAndRecipes = () => {
                 <TableHead className="w-10">
                   <Checkbox />
                 </TableHead>
-                <TableHead>Event Date</TableHead>
-                <TableHead>Client Name</TableHead>
-                <TableHead>Package Name</TableHead>
-                <TableHead>Items Ordered</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Kitchen Sheet</TableHead>
+                <TableHead>SKU</TableHead>
+                <TableHead>Item Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Unit</TableHead>
+                <TableHead>Availability</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
+            <TableBody>
+              {mockMenuData.map((item) => (
+                <TableRow key={item.sku}>
+                  <TableCell>
+                    <Checkbox />
+                  </TableCell>
+                  <TableCell className="font-mono">{item.sku}</TableCell>
+                  <TableCell className="font-semibold">{item.itemName}</TableCell>
+                  <TableCell>{item.category}</TableCell>
+                  <TableCell>₱{item.price.toFixed(2)}</TableCell>
+                  <TableCell>{item.unit}</TableCell>
+                  <TableCell>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      item.availability === "Available"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}>
+                      {item.availability}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => console.log('View', item.sku)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="View"
+                      >
+                        <Eye className="w-4 h-4 text-blue-600" />
+                      </button>
+                      <button
+                        onClick={() => console.log('Edit', item.sku)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="Edit"
+                      >
+                        <Pencil className="w-4 h-4 text-green-600" />
+                      </button>
+                      <button
+                        onClick={() => console.log('Delete', item.sku)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table> 
         </div>
        </div>

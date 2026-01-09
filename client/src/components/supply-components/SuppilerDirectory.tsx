@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Search } from "lucide-react";
+import { Search, Pencil, Eye, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -106,18 +106,27 @@ const SupplierDirectory = () => {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <button className="text-blue-600 hover:text-blue-800 text-sm">
-                        Edit
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => console.log('View', supplier.id)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="View"
+                      >
+                        <Eye className="w-4 h-4 text-blue-600" />
                       </button>
                       <button
-                        className={`text-sm ${
-                          supplier.status === "Active"
-                            ? "text-red-600 hover:text-red-800"
-                            : "text-green-600 hover:text-green-800"
-                        }`}
+                        onClick={() => console.log('Edit', supplier.id)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="Edit"
                       >
-                        {supplier.status === "Active" ? "Deactivate" : "Activate"}
+                        <Pencil className="w-4 h-4 text-green-600" />
+                      </button>
+                      <button
+                        onClick={() => console.log('Delete', supplier.id)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
                       </button>
                     </div>
                   </TableCell>
