@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table" 
 
 const Inventory = () => { 
+
   const mockData: stockData[] = [
     {
       sku: 1,
@@ -125,13 +126,13 @@ const [activeTab, setActiveTab] = useState<string>("inventory");
                 <TableHead className="w-10">
                   <Checkbox />
                 </TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>Item Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Stock Level</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-bold text-[#94979F]">SKU</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Item Name</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Category</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Stock Level</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Unit</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Status</TableHead>
+                <TableHead className="text-right text-bold text-[#94979F]">Actions</TableHead>
               </TableRow>
             </TableHeader>
 

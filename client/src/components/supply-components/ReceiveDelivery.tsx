@@ -124,16 +124,16 @@ const ReceiveDelivery = () => {
             <Button>Add Product</Button>
           </div>
 
-          <div className="rounded-tl-xl rounded-tr-xl border overflow-hidden">
+          <div className="rounded-tl-xl rounded-tr-xl border overflow-hidden text-bold">
             <Table>
-              <TableHeader className="bg-[#92AEF9]">
+              <TableHeader>
                 <TableRow>
-                  <TableHead className="text-white">Product Name</TableHead>
-                  <TableHead className="text-white">Category</TableHead>
-                  <TableHead className="text-white">Quantity</TableHead>
-                  <TableHead className="text-white">Unit</TableHead>
-                  <TableHead className="text-white">Unit Cost</TableHead>
-                  <TableHead className="text-white">Total Cost</TableHead>
+                  <TableHead className="text-black">Product Name</TableHead>
+                  <TableHead className="text-black">Category</TableHead>
+                  <TableHead className="text-black">Quantity</TableHead>
+                  <TableHead className="text-black">Unit</TableHead>
+                  <TableHead className="text-black">Unit Cost</TableHead>
+                  <TableHead className="text-black">Total Cost</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

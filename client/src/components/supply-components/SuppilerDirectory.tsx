@@ -75,9 +75,6 @@ const SupplierDirectory = () => {
               <TableHead>ID</TableHead>
               <TableHead>Supplier Name</TableHead>
               <TableHead>Primary Category</TableHead>
-              <TableHead>Contact Person</TableHead>
-              <TableHead>Phone / Email</TableHead>
-              <TableHead>Payment Terms</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -87,13 +84,8 @@ const SupplierDirectory = () => {
               filteredSuppliers.map((supplier) => (
                 <TableRow key={supplier.id}>
                   <TableCell className="font-medium">{supplier.id}</TableCell>
-                  <TableCell className="font-semibold">{supplier.supplierName}</TableCell>
-                  <TableCell>{supplier.primaryCategory}</TableCell>
-                  <TableCell>{supplier.contactPerson}</TableCell>
-                  <TableCell className="whitespace-pre-line text-sm">
-                    {supplier.phoneEmail}
-                  </TableCell>
-                  <TableCell>{supplier.paymentTerms}</TableCell>
+                  <TableCell className="font-semibold break-words">{supplier.supplierName}</TableCell>
+                  <TableCell>{supplier.primaryCategory}</TableCell> 
                   <TableCell>
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${

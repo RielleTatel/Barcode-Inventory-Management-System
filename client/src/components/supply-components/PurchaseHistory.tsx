@@ -134,7 +134,6 @@ const PurchaseHistory = () => {
                 <TableHead>Date Received</TableHead>
                 <TableHead>Ref # (DR)</TableHead>
                 <TableHead>Supplier</TableHead>
-                <TableHead>Items Summary</TableHead>
                 <TableHead>Receiving Branch</TableHead>
                 <TableHead>Total Cost</TableHead>
                 <TableHead>Received By</TableHead>
@@ -147,7 +146,6 @@ const PurchaseHistory = () => {
                   <TableCell>{log.dateReceived}</TableCell>
                   <TableCell className="font-medium">{log.refNumber}</TableCell>
                   <TableCell className="font-semibold">{log.supplier}</TableCell>
-                  <TableCell className="max-w-xs">{log.itemsSummary}</TableCell>
                   <TableCell>{log.receivingBranch}</TableCell>
                   <TableCell className="font-semibold">
                     ₱ {log.totalCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
