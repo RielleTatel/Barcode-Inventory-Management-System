@@ -20,27 +20,22 @@ export const InventoryTabs = ({
   onChange: (tab: string) => void
 }) => {
   return (
-    <div className="ml-2 border-b-3 border-[#CBCBCB]">
-      <div className="flex gap-8">
+    <div className="w-full bg-white rounded-xl border border-[#E5E5E5] p-1">
+      <div className="flex gap-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key
-
           return (
             <button
               key={tab.key}
               onClick={() => onChange(tab.key)}
               className={cn(
-                "relative pb-3 text-sm font-medium transition-colors",
+                "flex-1 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200",
                 isActive
-                  ? "text-foreground"
-                  : "text-[#94979F] hover:text-foreground"
+                  ? "bg-[#ECEFF7] text-[#507ADC]"
+                  : "text-text-color hover:bg-inner-background hover:text-[#507ADC]"
               )}
             >
               {tab.label}
-
-              {isActive && (
-                <span className="absolute left-0 -bottom-0.75 h-0.75 w-full bg-teal-600 rounded-full" />
-              )}
             </button>
           )
         })}
@@ -57,27 +52,22 @@ export const SupplyTabs = ({
   onChange: (tab: string) => void
 }) => {
   return (
-    <div className="ml-2 border-b-3 border-[#CBCBCB]">
-      <div className="flex gap-8">
+    <div className="w-full bg-white rounded-xl border border-[#E5E5E5] p-1">
+      <div className="flex gap-1">
         {supplyTabs.map((tab) => {
           const isActive = activeTab === tab.key
-
           return (
             <button
               key={tab.key}
               onClick={() => onChange(tab.key)}
               className={cn(
-                "relative pb-3 text-sm font-medium transition-colors",
+                "flex-1 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200",
                 isActive
-                  ? "text-foreground"
-                  : "text-[#94979F] hover:text-foreground"
+                  ? "bg-[#ECEFF7] text-[#507ADC]"
+                  : "text-text-color hover:bg-inner-background hover:text-[#507ADC]"
               )}
             >
               {tab.label}
-
-              {isActive && (
-                <span className="absolute left-0 -bottom-0.75 h-0.75 w-full bg-teal-600 rounded-full" />
-              )}
             </button>
           )
         })}

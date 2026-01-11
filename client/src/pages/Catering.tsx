@@ -66,7 +66,7 @@ const mockCateringData: CateringOrder[] = [
 const Catering = () => { 
 
   return (
-    <div className="flex flex-col h-full w-full gap-y-6">
+    <div className="flex flex-col h-full w-full gap-y-6 ">
 
       <div className="rounded-xl p-2 flex gap-x-7">
         <div className="flex flex-col">
@@ -80,7 +80,7 @@ const Catering = () => {
         </div>  
       </div>  
 
-      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4 overflow-auto">
+      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4 overflow-auto border border-[#E5E5E5]">
 
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div className="flex gap-2">
@@ -106,18 +106,18 @@ const Catering = () => {
 
         <div className="rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-[#F9FAFB]">
               <TableRow>
                 <TableHead className="w-10">
                   <Checkbox />
                 </TableHead>
-                <TableHead>Event Date</TableHead>
-                <TableHead>Client Name</TableHead>
-                <TableHead>Package Name</TableHead>
-                <TableHead className="max-w-xs">Items Ordered</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Kitchen Sheet</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Event Date</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Client Name</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Package Name</TableHead>
+                <TableHead className="max-w-xs text-bold text-[#94979F]">Items Ordered</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Status</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Kitchen Sheet</TableHead>
+                <TableHead className="text-right text-bold text-[#94979F]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

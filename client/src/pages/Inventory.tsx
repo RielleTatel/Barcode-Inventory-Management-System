@@ -50,7 +50,7 @@ const Inventory = () => {
 
 const [activeTab, setActiveTab] = useState<string>("inventory");
   return (
-    <div className="flex flex-col h-full w-full gap-y-6">
+    <div className="flex flex-col h-full w-full gap-y-2.5">
 
     <div className="rounded-xl p-2 flex gap-x-7">
       <div className="flex flex-col">
@@ -69,7 +69,7 @@ const [activeTab, setActiveTab] = useState<string>("inventory");
         onChange={setActiveTab}
       />
 
-      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4">
+      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4 border border-[#E5E5E5]">
 
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div className="flex gap-2">
@@ -121,7 +121,7 @@ const [activeTab, setActiveTab] = useState<string>("inventory");
 
         <div className="rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-[#F9FAFB]">
               <TableRow>
                 <TableHead className="w-10">
                   <Checkbox />

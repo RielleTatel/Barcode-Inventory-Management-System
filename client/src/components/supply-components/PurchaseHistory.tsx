@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import type { PurchaseLog } from "./supplier-types";
 
-// Mock data - replace with actual data from API
 const mockPurchaseLogs: PurchaseLog[] = [
   {
     dateReceived: "Dec 20, 2025",
@@ -59,10 +58,9 @@ const PurchaseHistory = () => {
   const totalSpend = mockPurchaseLogs.reduce((sum, log) => sum + log.totalCost, 0);
 
   return (
-    <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-6 gap-y-6">
-      {/* Filters Section */}
+    <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-6 gap-y-6 border border-[#E5E5E5]">
+
       <div className="flex items-end gap-4">
-        {/* Date Range */}
         <div className="flex flex-col gap-2">
           <label className="font-semibold text-sm">Date Range:</label>
           <div className="flex items-center gap-2">
@@ -84,7 +82,6 @@ const PurchaseHistory = () => {
           </div>
         </div>
 
-        {/* Branch Filter */}
         <div className="flex flex-col gap-2">
           <label className="font-semibold text-sm">Branch:</label>
           <Select value={selectedBranch} onValueChange={setSelectedBranch}>
@@ -101,7 +98,6 @@ const PurchaseHistory = () => {
           </Select>
         </div>
 
-        {/* Supplier Filter */}
         <div className="flex flex-col gap-2">
           <label className="font-semibold text-sm">Supplier:</label>
           <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
@@ -119,30 +115,27 @@ const PurchaseHistory = () => {
           </Select>
         </div>
 
-        {/* Filter Button */}
         <Button className="bg-blue-600 hover:bg-blue-700">Filter</Button>
       </div>
 
-      {/* Delivery Logs Section */}
       <div className="flex flex-col gap-y-4">
         <h2 className="text-lg font-bold">Delivery Logs (Past 30 Days)</h2>
-
         <div className="rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-[#F9FAFB]">
               <TableRow>
-                <TableHead>Date Received</TableHead>
-                <TableHead>Ref # (DR)</TableHead>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Receiving Branch</TableHead>
-                <TableHead>Total Cost</TableHead>
-                <TableHead>Received By</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Date Received</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Ref # (DR)</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Supplier</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Receiving Branch</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Total Cost</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Received By</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Details</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mockPurchaseLogs.map((log, index) => (
-                <TableRow key={index}>
+                <TableRow key={index}> 
                   <TableCell>{log.dateReceived}</TableCell>
                   <TableCell className="font-medium">{log.refNumber}</TableCell>
                   <TableCell className="font-semibold">{log.supplier}</TableCell>

@@ -84,7 +84,7 @@ const MenusAndRecipes = () => {
       </div>  
     </div>  
 
-      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4">
+      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4 border border-[#E5E5E5]">
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div className="flex gap-2">
             <Input placeholder="Search product" className="w-64" />
@@ -109,18 +109,18 @@ const MenusAndRecipes = () => {
 
         <div className="rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-[#F9FAFB]">
               <TableRow>
                 <TableHead className="w-10">
                   <Checkbox />
                 </TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>Item Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Availability</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-bold text-[#94979F]">SKU</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Item Name</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Category</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Price</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Unit</TableHead>
+                <TableHead className="text-bold text-[#94979F]">Availability</TableHead>
+                <TableHead className="text-righ text-bold text-[#94979F]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

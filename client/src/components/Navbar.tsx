@@ -35,7 +35,7 @@ const Navbar = () => {
   ];
 
   return (
-    <div className="shadow-md h-auto min-h-full w-70 bg-white rounded-[40px] p-5 flex flex-col gap-1 font-sans text-text-color self-stretch">
+    <div className="shadow-md h-auto min-h-full w-70 bg-white rounded-[40px] p-5 flex flex-col gap-1 font-sans text-text-color self-stretch border border-[#E5E5E5]">
 
       <div className="w-full bg-inner-background h-25 rounded-[10px] flex flex-row items-center px-2 gap-1 justify-center">
         <div className="w-15 h-15 rounded-full bg-white flex items-center justify-center overflow-hidden">
@@ -68,7 +68,7 @@ const Navbar = () => {
                 {({ isActive }) => (
                   <div
                     className={`group text-[13px] w-full h-11.25 rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer 
-                      ${isActive ? "bg-text-highlight text-white shadow-md" : "hover:bg-text-highlight hover:shadow-md"}
+                      ${isActive ? "bg-[#507ADC] text-white shadow-md" : "hover:bg-[#507ADC] hover:shadow-md"}
                     `}
                   >
                     <Icon

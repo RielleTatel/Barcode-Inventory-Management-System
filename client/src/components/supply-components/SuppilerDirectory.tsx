@@ -53,7 +53,7 @@ const SupplierDirectory = () => {
   );
 
   return (
-    <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-2 gap-y-4">
+    <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-2 gap-y-4 border border-[#E5E5E5]">
 
       <div className="flex justify-between items-center gap-4">
         <div className="relative flex-1 max-w-md">
@@ -68,15 +68,15 @@ const SupplierDirectory = () => {
         <Button className="bg-blue-600 hover:bg-blue-700">+ Add New Supplier</Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border border-[#E5E5E5]">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-[#F9FAFB]">
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Supplier Name</TableHead>
-              <TableHead>Primary Category</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="text-bold text-[#94979F]">ID</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Supplier Name</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Primary Category</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Status</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

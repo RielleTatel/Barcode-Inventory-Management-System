@@ -66,7 +66,7 @@ const mockActiveSuppliers: ActiveSupplier[] = [
 const ReceiveDelivery = () => { 
     return (
       <>
-      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-10">
+      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-10 border border-[#E5E5E5]">
         <div className="flex flex-col gap-y-2"> 
           <div className="flex flex-row gap-x-2 items-center">
             <span className="w-10 h-10"> <PackageCheck className="w-full h-full" /> </span>
@@ -126,14 +126,14 @@ const ReceiveDelivery = () => {
 
           <div className="rounded-tl-xl rounded-tr-xl border overflow-hidden text-bold">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-[#F9FAFB]">
                 <TableRow>
-                  <TableHead className="text-black">Product Name</TableHead>
-                  <TableHead className="text-black">Category</TableHead>
-                  <TableHead className="text-black">Quantity</TableHead>
-                  <TableHead className="text-black">Unit</TableHead>
-                  <TableHead className="text-black">Unit Cost</TableHead>
-                  <TableHead className="text-black">Total Cost</TableHead>
+                  <TableHead className="text-bold text-[#94979F]">Product Name</TableHead>
+                  <TableHead className="text-bold text-[#94979F]">Category</TableHead>
+                  <TableHead className="text-bold text-[#94979F]">Quantity</TableHead>
+                  <TableHead className="text-bold text-[#94979F]">Unit</TableHead>
+                  <TableHead className="text-bold text-[#94979F]">Unit Cost</TableHead>
+                  <TableHead className="text-bold text-[#94979F]">Total Cost</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -161,7 +161,7 @@ const ReceiveDelivery = () => {
         </div> 
     </div> 
 
-      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4">
+      <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4 border border-[#E5E5E5]">
 
         <div className="flex flex-row gap-x-2 items-center">
           <span className="w-10 h-10"> <UserStar className="w-full h-full" /> </span>
@@ -170,13 +170,13 @@ const ReceiveDelivery = () => {
 
       <div className="rounded-tl-xl rounded-tr-xl border overflow-hidden">
         <Table>
-          <TableHeader className="bg-[#92AEF9]">
+          <TableHeader className="bg-[#F9FAFB]">
             <TableRow>
-              <TableHead className="text-white">Supplier Name</TableHead>
-              <TableHead className="text-white">Category</TableHead>
-              <TableHead className="text-white">Contact Person</TableHead>
-              <TableHead className="text-white">Lead Time</TableHead>
-              <TableHead className="text-white">Status</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Supplier Name</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Category</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Contact Person</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Lead Time</TableHead>
+              <TableHead className="text-bold text-[#94979F]">Status</TableHead>
             </TableRow>
           </TableHeader>
 
