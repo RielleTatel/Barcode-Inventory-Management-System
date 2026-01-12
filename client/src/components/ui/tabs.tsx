@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 
 const tabs = [
-  { key: "inventory", label: "Inventory" },
+  { key: "inventories", label: "Inventories" },
   { key: "consumption", label: "Consumption Entry" },
   { key: "transfer", label: "Transfer" },
 ]
