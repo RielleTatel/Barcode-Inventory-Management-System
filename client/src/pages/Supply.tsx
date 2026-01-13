@@ -27,13 +27,8 @@ const Supply = () => {
     <div className="rounded-xl p-2 flex flex-col gap-y-4">
       <div className="flex flex-col">
         <p className="text-[32px] font-bold"> Supply Management </p> 
-        <p className="text-md">Manage Your Supplies </p> 
-      </div>
-
-      <div className="flex gap-3 items-center">
-        <Button variant="outline">Export</Button>
-        <Button>Add Product</Button>
-      </div>  
+        <p className="text-md"> Manage Your Supplies </p> 
+      </div> 
     </div>  
 
       <SupplyTabs

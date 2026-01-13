@@ -47,8 +47,8 @@ const Inventories = () => {
   ]
 
   return (
+    <>
       <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4 border border-[#E5E5E5]">
-
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div className="flex gap-2">
             <Input placeholder="Search product" className="w-64" />
@@ -160,6 +160,7 @@ const Inventories = () => {
 
         </div>
       </div>
+    </>
   );
 };
 

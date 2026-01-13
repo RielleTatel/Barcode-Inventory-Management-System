@@ -72,7 +72,7 @@ const MenusAndRecipes = () => {
   return (
     <div className="flex flex-col h-full w-full gap-y-6">
 
-    <div className="rounded-xl p-2 flex flex-col gap-y-4">
+    <div className="rounded-xl p-2 flex flex-row gap-x-4">
       <div className="flex flex-col">
         <p className="text-[32px] font-bold"> Menu Master List & Recipe Management </p> 
         <p className="text-md">Manage Your Food Menu </p> 
