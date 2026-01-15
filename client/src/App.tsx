@@ -8,6 +8,8 @@ import Catering from './pages/Catering';
 import Inventory from './pages/Inventory';
 import MenusAndRecipes from './pages/MenusAndRecipes'; 
 import Supply from './pages/Supply';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import { Settings } from 'lucide-react';
 
 function App() {
@@ -16,7 +18,11 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
+          {/* Protected routes */}
           <Route element={<Mainlayout />}>
 
             <Route 
