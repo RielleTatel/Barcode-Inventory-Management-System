@@ -24,13 +24,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9jbo9v+rfn8i7qifns*omldn1vb8uwf)&%b6i_44bh%sbobh46'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True 
 
 ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'backend']
 
+AUTH_USER_MODEL = 'accounts.User'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+} 
 
-# Application definition
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     
+    'ROTATE_REFRESH_TOKENS': True,                   
+    'BLACKLIST_AFTER_ROTATION': True,                
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.accounts', 
-    'apps.bomConsupmtion', 
+    'apps.bomConsumption', 
 ]
 
 MIDDLEWARE = [
@@ -79,7 +91,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'auth_db'),
+        'NAME': os.environ.get('DB_NAME', 'ims_db'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': os.environ.get('DB_PASS', 'postgres_password'),
         'HOST': os.environ.get('DB_HOST', 'db'),

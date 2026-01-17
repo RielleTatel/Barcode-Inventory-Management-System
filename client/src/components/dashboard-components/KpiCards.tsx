@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { LucideIcon } from 'lucide-react';
+import type { InventoryKpiData, KpiConfig, KpiCardProps } from '.';
 
 import {
   AlertTriangle,
@@ -8,30 +8,6 @@ import {
   Truck,
 } from 'lucide-react';
 
-export interface InventoryKpiData {
-  lowStock: number;
-  totalItems: number;
-  preparedFood: number;
-  pendingTransfers: number;
-}
-
-type KpiConfig = {
-  title: string;
-  subtitle: string;
-  description: string;
-  iconColor: string;
-  dataKey: keyof InventoryKpiData;
-  icon?: LucideIcon;
-};
-
-type KpiCardProps = {
-  title: string;
-  iconColor: string;
-  subtitle: string;
-  description: string;
-  value: number;
-  icon?: LucideIcon;
-};
 
 const KpiCard = ({
   title,

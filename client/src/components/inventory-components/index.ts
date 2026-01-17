@@ -1,4 +1,3 @@
-
 export interface stockData {
     sku: number; 
     itemName: string; 
