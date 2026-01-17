@@ -5,18 +5,20 @@ import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
 
 interface LoginFormData {
-  username: string;
+  email: string;
   password: string;
 }
 
 export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginFormData>({
-    username: '',
+    email: '',
     password: '',
   });
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -26,25 +28,39 @@ export default function Login() {
     setError('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      setTimeout(() => {
-        console.log('Login data:', formData);
+  try {
+    const response = await fetch('http://localhost:8000/api/auth/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
 
-        localStorage.setItem('access_token', 'mock_access_token');
-        localStorage.setItem('user', JSON.stringify({ username: formData.username }));
-        
-        navigate('/dashboard');
-      }, 1000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error('Invalid credentials');
     }
-  };
+
+    const data = await response.json();
+    
+    localStorage.setItem('access_token', data.access);
+    localStorage.setItem('user', JSON.stringify({ email: formData.email }));
+    
+    navigate('/dashboard');
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Login failed');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -62,17 +78,17 @@ export default function Login() {
           )}
 
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-              Username
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email
             </label>
             <Input
-              id="username"
-              name="username"
-              type="text"
+              id="email"
+              name="email"
+              type="email"
               required
-              value={formData.username}
+              value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               className="w-full"
             />
           </div>
