@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
+import axios from 'axios';
 
 interface RegisterFormData {
   username: string;
@@ -23,6 +24,7 @@ export default function Register() {
     first_name: '',
     last_name: '',
   });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +33,7 @@ export default function Register() {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    // Clear error for this field
+
     setErrors({ ...errors, [e.target.name]: '' });
   };
 
@@ -55,6 +57,7 @@ export default function Register() {
     
     // Validate form
     const validationErrors = validateForm();
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -63,19 +66,15 @@ export default function Register() {
     setLoading(true);
 
     try {
-      setTimeout(() => {
-        console.log('Registration data:', formData);
-        // Store mock tokens
-        localStorage.setItem('access_token', 'mock_access_token');
-        localStorage.setItem('user', JSON.stringify({ 
-          username: formData.username,
-          email: formData.email,
-          first_name: formData.first_name,
-          last_name: formData.last_name
-        }));
-        
-        // Redirect to dashboard
-        navigate('/dashboard');
+
+      const response = await axios
+
+      setTimeout(() => { 
+        navigate('/login', {
+          state: {
+            message: "Registration successful! Please wait for admin approval before logging in."
+          }
+        }); 
       }, 1000);
     } catch (err) {
       console.error('Registration error:', err);

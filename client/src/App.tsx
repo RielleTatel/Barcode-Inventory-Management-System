@@ -8,6 +8,7 @@ import Catering from './pages/Catering';
 import Inventory from './pages/Inventory';
 import MenusAndRecipes from './pages/MenusAndRecipes'; 
 import Supply from './pages/Supply';
+import AdminPanel from './pages/AdminPanel';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { Settings } from 'lucide-react';
@@ -64,6 +65,11 @@ function App() {
               path="catering" 
               element={<Catering/>}
             /> 
+
+            <Route 
+              path="admin" 
+              element={<AdminPanel/>}
+            />
 
             <Route 
               path="settings" 

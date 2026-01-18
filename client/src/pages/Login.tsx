@@ -39,6 +39,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', 
       body: JSON.stringify({
         email: formData.email,
         password: formData.password,

@@ -9,13 +9,15 @@ import {
   Beef,
   Soup,
   UtensilsCrossedIcon,
-  LogOut,
+  ShieldCheck,
+  Shield,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import LogoutUser from "./ui/logoutUser";
 
 type NavItemVariant = "default" | "highlighted";
 
-type NavItem = {
+export type NavItem = {
   path: string;
   label: string;
   icon: LucideIcon;
@@ -23,6 +25,7 @@ type NavItem = {
 };
 
 const Navbar = () => {
+
   const navItems: NavItem[] = [
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/dashboardPage1", label: "DashboardPage1", icon: Beef, variant: "highlighted" },
@@ -34,12 +37,19 @@ const Navbar = () => {
     { path: "/supply", label: "Supply", icon: Truck },
   ];
 
+  const navSettings: NavItem[] = [
+    { path: "/admin", label: "Admin", icon: Shield },
+    { path: "/settings", label: "Setting", icon: Settings },
+  ]
+
   return (
     <div className="shadow-md h-auto min-h-full w-70 bg-white rounded-[40px] p-5 flex flex-col gap-1 font-sans text-text-color self-stretch border border-[#E5E5E5]">
 
       <div className="w-full bg-inner-background h-25 rounded-[10px] flex flex-row items-center px-2 gap-1 justify-center">
         <div className="w-15 h-15 rounded-full bg-white flex items-center justify-center overflow-hidden">
-          <img src="" alt="" className="w-full h-full" />
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+            Logo
+          </div>
         </div>
         <div className="flex flex-col leading-none text-left ml-2 text-text-color">
           <span className="text-[13px] font-bold mb-1">Barcode Restaurant</span>
@@ -88,9 +98,9 @@ const Navbar = () => {
                 )}
               </NavLink>
             );
-          })}
-        </div>
+          })} 
 
+        </div>
 
         <div className="w-full mt-6 mb-2 text-left">
           <p className="text-xs font-bold uppercase tracking-wide text-text-blur">
@@ -99,52 +109,41 @@ const Navbar = () => {
         </div>
 
         <div className="flex flex-col gap-1">
-          <NavLink to="/settings">
-            {({ isActive }) => (
-              <div
-                className={`group text-[13px] w-full h-11.25 rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer 
-                  ${isActive ? "bg-text-highlight text-white shadow-md" : "hover:bg-text-highlight hover:shadow-md"}
-                `}
-              >
-                <Settings
-                  className={`ml-7 w-4 h-4 transition-colors 
-                    ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
-                  `}
-                />
-                <p
-                  className={`font-semibold transition-colors 
-                    ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
-                  `}
+          {navSettings.map((item) => {
+            const Icon = item.icon;
+            const isHighlighted = item.variant === "highlighted";
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.path === "/"}
                 >
-                  Settings
-                </p>
-              </div>
-            )}
-          </NavLink>
-
-          <NavLink to="/logout">
-            {({ isActive }) => (
-              <div
-                className={`group text-[13px] w-full h-11.25 rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer 
-                  ${isActive ? "bg-text-highlight text-white shadow-md" : "hover:bg-text-highlight hover:shadow-md"}
-                `}
-              >
-                <LogOut
-                  className={`ml-7 w-4 h-4 transition-colors 
-                    ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
-                  `}
-                />
-                <p
-                  className={`font-semibold transition-colors 
-                    ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
-                  `}
-                >
-                  Logout
-                </p>
-              </div>
-            )}
-          </NavLink>
-        </div>
+                  {({ isActive }) => (
+                    <div
+                      className={`group text-[13px] w-full h-11.25 rounded-[14px] flex justify-start items-center gap-x-3 transition-all cursor-pointer 
+                        ${isActive ? "bg-[#507ADC] text-white shadow-md" : "hover:bg-[#507ADC] hover:shadow-md"}
+                      `}
+                    >
+                      <Icon
+                        className={`ml-7 w-4 h-4 transition-colors 
+                          ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
+                          ${isHighlighted ? "ml-15" : ""}
+                        `}
+                      />
+                      <p
+                        className={`font-semibold transition-colors 
+                          ${isActive ? "text-white" : "text-text-color group-hover:text-white"}
+                        `}
+                      >
+                        {item.label}
+                      </p>
+                    </div>
+                  )}
+                </NavLink>
+              );
+            })} 
+          <LogoutUser />
+        </div> 
       </nav>
     </div>
   );

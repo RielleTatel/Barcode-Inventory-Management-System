@@ -1,8 +1,20 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios'; 
-import type { ReactNode } from 'react'; 
-import { jwtDecode } from 'jwt-decode'; 
-import type { AuthContextType, User  } from '.';
+import type { ReactNode } from 'react';
+import api from '@/components/ui/api';
+import { jwtDecode } from 'jwt-decode';
+
+interface User {
+  user_id: number;
+  email: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  accessToken: string | null;
+  login: (token: string) => void;
+  logout: () => void;
+  isInitialized: boolean; 
+}
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -13,14 +25,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const setAuthData = (token: string) => {
     const decoded: User = jwtDecode(token);
-    setAccessToken(token);  
-    setUser(decoded); 
+    setAccessToken(token);
+    setUser(decoded);
   };
 
   useEffect(() => {
+
     const checkAuth = async () => {
       try {
-        const { data } = await axios.post('/accounts/refresh/'); 
+        const { data } = await api.post('/accounts/refresh/'); 
         setAuthData(data.access);
       } catch (error) {
         setUser(null);
@@ -50,11 +63,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useAuth = () => {
+
   const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };
+
+
