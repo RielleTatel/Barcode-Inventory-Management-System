@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import api from '@/components/ui/api';
+import api from '@/hooks/api';
 import { jwtDecode } from 'jwt-decode';
 
 interface User {
@@ -31,9 +31,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
 
-    const checkAuth = async () => {
+    const checkAuth = async () => { 
+
+      const hasToken = document.cookie.includes('refresh_token');
+      if (!hasToken) {
+        setIsInitialized(true);
+        return;
+      }
+
       try {
-        const { data } = await api.post('/accounts/refresh/'); 
+        const { data } = await api.post('/auth/refresh/'); 
         setAuthData(data.access);
       } catch (error) {
         setUser(null);

@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useTabWithUrl } from "@/hooks/useTabWithUrl";
 import PendingUsers from "@/components/admin-components/PendingUsers";
 import ApprovedUsers from "@/components/admin-components/ApprovedUsers";
 
@@ -9,7 +9,7 @@ const adminTabs = [
 ];
 
 const AdminPanel = () => {
-  const [activeTab, setActiveTab] = useState<string>("pending");
+  const [activeTab, handleTabChange] = useTabWithUrl("pending");
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -44,7 +44,7 @@ const AdminPanel = () => {
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => handleTabChange(tab.key)}
                 className={`flex-1 px-6 py-3 text-sm font-medium rounded-lg transition-all ${
                   isActive
                     ? "bg-[#507ADC] text-white shadow-sm"

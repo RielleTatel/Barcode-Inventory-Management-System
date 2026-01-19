@@ -1,10 +1,11 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import generics, permissions
+from .serializers import RegisterSerializer
 from rest_framework.response import Response
 
 class CookieTokenObtainPairView(TokenObtainPairView):
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
-
             cookie_max_age = 3600 * 24 * 7 # 7 days
             response.set_cookie(
                 'refresh_token', 
@@ -14,4 +15,8 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 samesite='Lax'
             )
             del response.data['refresh'] # Remove from JSON body
-        return super().finalize_response(request, response, *args, **kwargs)
+        return super().finalize_response(request, response, *args, **kwargs) 
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny] # Publicly accessible

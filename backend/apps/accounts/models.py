@@ -3,7 +3,6 @@ from django.db import models
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-
     status = models.BooleanField(default=False)
 
     POSITION_CHOICES = [

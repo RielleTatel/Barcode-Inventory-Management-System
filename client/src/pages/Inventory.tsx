@@ -1,13 +1,12 @@
-import { useState } from "react"
 import { Button } from "@/components/ui/button";
 import { InventoryTabs } from "@/components/ui/tabs";
+import { useTabWithUrl } from "@/hooks/useTabWithUrl";
 import Inventories from "@/components/inventory-components/Inventories";
 import Consumption from "@/components/inventory-components/Consumption";
 import Transfer from "@/components/inventory-components/Transfer";
 
 const Inventory = () => {
-
-  const [activeTab, setActiveTab] = useState<string>("inventories"); 
+  const [activeTab, handleTabChange] = useTabWithUrl("inventories"); 
 
   const renderTabContent = () => {
       switch (activeTab) {
@@ -38,7 +37,7 @@ const Inventory = () => {
 
         <InventoryTabs
           activeTab={activeTab}
-          onChange={setActiveTab}
+          onChange={handleTabChange}
         />  
 
         {renderTabContent()}

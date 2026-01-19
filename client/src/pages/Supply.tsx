@@ -1,12 +1,12 @@
-import { useState } from "react"
 import { Button } from "@/components/ui/button";
 import { SupplyTabs } from "@/components/ui/tabs";
+import { useTabWithUrl } from "@/hooks/useTabWithUrl";
 import ReceiveDelivery from "@/components/supply-components/ReceiveDelivery";
 import SupplierDirectory from "@/components/supply-components/SuppilerDirectory";
 import PurchaseHistory from "@/components/supply-components/PurchaseHistory";
 
 const Supply = () => { 
-  const [activeTab, setActiveTab] = useState<string>("receive-delivery");
+  const [activeTab, handleTabChange] = useTabWithUrl("receive-delivery");
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -33,7 +33,7 @@ const Supply = () => {
 
       <SupplyTabs
         activeTab={activeTab}
-        onChange={setActiveTab}
+        onChange={handleTabChange}
       />
 
       {renderTabContent()}

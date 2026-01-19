@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
+import { AxiosError } from 'axios';
 import axios from 'axios';
 
 interface RegisterFormData {
@@ -32,7 +33,7 @@ export default function Register() {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    });
+  });
 
     setErrors({ ...errors, [e.target.name]: '' });
   };
@@ -54,10 +55,8 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
-    // Validate form
-    const validationErrors = validateForm();
 
+    const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -66,19 +65,44 @@ export default function Register() {
     setLoading(true);
 
     try {
+      await axios.post(
+        'http://localhost:8000/api/auth/register/',
+        formData
+      );
 
-      const response = await axios
-
-      setTimeout(() => { 
-        navigate('/login', {
-          state: {
-            message: "Registration successful! Please wait for admin approval before logging in."
-          }
-        }); 
-      }, 1000);
-    } catch (err) {
-      console.error('Registration error:', err);
       setLoading(false);
+
+      navigate('/login', {
+        state: {
+          message:
+            'Registration successful! Please wait for admin approval before logging in.',
+        },
+      });
+    } catch (error: unknown) {
+      setLoading(false);
+
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data;
+
+        if (typeof data === 'object' && data !== null) {
+          const fieldErrors: Record<string, string> = {};
+
+          for (const key in data) {
+            fieldErrors[key] = Array.isArray(data[key])
+              ? data[key][0]
+              : String(data[key]);
+          }
+
+          setErrors(fieldErrors);
+          return;
+        }
+
+        setErrors({ general: 'Registration failed.' });
+      } else {
+        setErrors({ general: 'An unexpected error occurred.' });
+      }
+
+      console.error('Registration error:', error);
     }
   };
 
