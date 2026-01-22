@@ -1,9 +1,11 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from .views import CookieTokenObtainPairView, RegisterView
+from .views import CookieTokenObtainPairView, CookieTokenRefreshView, RegisterView, AdminUserUpdateView, AdminUserListView
 
 urlpatterns = [
     path('login/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('register/', RegisterView.as_view(), name='auth_register'),
+    path('refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
+    path('register/', RegisterView.as_view(), name='auth_register'), 
+
+    path('admin/users/', AdminUserListView.as_view(), name='admin-user-list'),
+    path('admin/users/<int:pk>/', AdminUserUpdateView.as_view(), name='admin-user-detail'),
 ]

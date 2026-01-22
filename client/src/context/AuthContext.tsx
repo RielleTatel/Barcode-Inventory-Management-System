@@ -2,19 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import api from '@/hooks/api';
 import { jwtDecode } from 'jwt-decode';
-
-interface User {
-  user_id: number;
-  email: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  accessToken: string | null;
-  login: (token: string) => void;
-  logout: () => void;
-  isInitialized: boolean; 
-}
+import type { User,  AuthContextType} from './index.ts';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -30,9 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-
     const checkAuth = async () => { 
-
       const hasToken = document.cookie.includes('refresh_token');
       if (!hasToken) {
         setIsInitialized(true);

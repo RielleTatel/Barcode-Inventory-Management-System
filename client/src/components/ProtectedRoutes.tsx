@@ -1,12 +1,18 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Loader2 } from "lucide-react";
+import type { ReactNode } from "react";
 
-const ProtectedRoute = ({ children, requiredRole = null }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+interface ProtectedRouteProps {
+  children: ReactNode;
+  requiredRole?: string | null;
+}
 
-  // Show loading spinner while checking authentication
-  if (loading) {
+const ProtectedRoute = ({ children, requiredRole = null }: ProtectedRouteProps) => {
+  const { user, isInitialized, accessToken } = useAuth();
+  const isAuthenticated = !!user && !!accessToken;
+
+  if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background-primary">
         <div className="text-center">
@@ -16,13 +22,11 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
       </div>
     );
   }
-3
-  // Redirect to login if not authenticated
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user account is verified
   if (user && !user.status) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background-primary">
@@ -59,7 +63,6 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
     );
   }
 
-  // Check role if required
   if (requiredRole && user?.role !== requiredRole) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background-primary">

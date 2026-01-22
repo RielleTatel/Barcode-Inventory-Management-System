@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Check, X, Search } from "lucide-react";
-import type { PendingUser } from "./index";
+import { Activity } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchAllUsers, updateUser, type User } from "@/api/accountApi";
 import {
   Table,
   TableBody,
@@ -20,40 +22,44 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+// ========== LOADING COMPONENT ==========
+const LoadingState = () => (
+  <div className="flex items-center justify-center h-64">
+    <div className="text-center">
+      <Activity className="h-12 w-12 animate-spin mx-auto mb-4" style={{ color: '#0033A0' }} />
+      <p className="text-gray-600">Loading health data...</p>
+    </div>
+  </div>
+); 
+
+  // ========== QUERY KEYS ==========
+const QUERY_KEYS = {
+  PENDING_USERS: ['users', 'pending'],
+};
+
 const PendingUsers = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedUser, setSelectedUser] = useState<PendingUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
+  const queryClient = useQueryClient();
 
-  // Mock data - replace with actual API call
-  const mockPendingUsers: PendingUser[] = [
-    {
-      id: 1,
-      username: "john_doe",
-      email: "john.doe@example.com",
-      firstName: "John",
-      lastName: "Doe",
-      dateRequested: "2026-01-15T10:30:00Z",
-    },
-    {
-      id: 2,
-      username: "jane_smith",
-      email: "jane.smith@example.com",
-      firstName: "Jane",
-      lastName: "Smith",
-      dateRequested: "2026-01-16T14:20:00Z",
-    },
-    {
-      id: 3,
-      username: "bob_wilson",
-      email: "bob.wilson@example.com",
-      firstName: "Bob",
-      lastName: "Wilson",
-      dateRequested: "2026-01-17T09:15:00Z",
-    },
-  ];
+  // Fetch all users and filter for pending (status = false)
+  const { data: allUsers = [], isLoading, error } = useQuery({
+    queryKey: QUERY_KEYS.PENDING_USERS,
+    queryFn: fetchAllUsers,
+    select: (users) => users.filter(user => user.status === false),
+  });
 
-  const handleOpenDialog = (user: PendingUser, action: "approve" | "reject") => {
+  // Mutation for updating user status
+  const updateUserMutation = useMutation({
+    mutationFn: ({ userId, updates }: { userId: number; updates: Partial<User> }) => 
+      updateUser(userId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PENDING_USERS });
+    },
+  }); 
+
+  const handleOpenDialog = (user: User, action: "approve" | "reject") => {
     setSelectedUser(user);
     setActionType(action);
   };
@@ -63,21 +69,30 @@ const PendingUsers = () => {
     setActionType(null);
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
     if (!selectedUser || !actionType) return;
     
-    // TODO: API call to approve/reject user
-    console.log(`${actionType} user:`, selectedUser);
+    if (actionType === "approve") {
+      await updateUserMutation.mutateAsync({
+        userId: selectedUser.id,
+        updates: { status: true, is_active: true }
+      });
+    } else {
+      await updateUserMutation.mutateAsync({
+        userId: selectedUser.id,
+        updates: { is_active: false }
+      });
+    }
     
     handleCloseDialog();
   };
 
-  const filteredUsers = mockPendingUsers.filter(
+  const filteredUsers = allUsers.filter(
     (user) =>
       user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+      user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.last_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const formatDate = (dateString: string) => {
@@ -90,6 +105,18 @@ const PendingUsers = () => {
       minute: "2-digit",
     });
   };
+
+  if (isLoading) return <LoadingState />;
+  
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center text-red-600">
+          <p>Error loading pending users</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -125,7 +152,7 @@ const PendingUsers = () => {
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-500 py-8">
+                  <TableCell colSpan={5} className="text-center text-gray-500 py-8">
                     No pending requests found
                   </TableCell>
                 </TableRow>
@@ -134,11 +161,11 @@ const PendingUsers = () => {
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.username}</TableCell>
                     <TableCell>
-                      {user.firstName} {user.lastName}
+                      {user.first_name} {user.last_name}
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell className="text-sm text-gray-600">
-                      {formatDate(user.dateRequested)}
+                      {formatDate(user.date_joined)}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

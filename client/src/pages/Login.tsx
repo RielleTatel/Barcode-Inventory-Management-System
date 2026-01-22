@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginFormData {
   email: string;
@@ -11,14 +12,13 @@ interface LoginFormData {
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
   });
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -52,8 +52,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     const data = await response.json();
     
-    localStorage.setItem('access_token', data.access);
-    localStorage.setItem('user', JSON.stringify({ email: formData.email }));
+    // Use AuthContext login function to set auth state
+    login(data.access);
     
     navigate('/dashboard');
   } catch (err) {

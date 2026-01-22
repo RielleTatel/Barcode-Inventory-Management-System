@@ -1,6 +1,9 @@
+
 export interface User {
   user_id: number;
   email: string;
+  status?: boolean;
+  role?: string;
 }
 
 export interface AuthContextType {

@@ -9,6 +9,7 @@ class User(AbstractUser):
         ("manager", "Manager"),
         ("staff", "Staff"),
     ]
+    
     position = models.CharField(
         max_length=20,
         choices=POSITION_CHOICES,

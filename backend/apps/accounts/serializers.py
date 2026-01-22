@@ -22,4 +22,15 @@ class RegisterSerializer(serializers.ModelSerializer):
             status=False     
         )
         return user 
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+
+        fields = [
+            'id', 'email', 'username', 'first_name', 'last_name', 
+            'position', 'status', 'is_active', 'date_joined'
+        ]
+
+        read_only_fields = ['id', 'email', 'date_joined']
     
