@@ -15,7 +15,7 @@ export interface User {
 
 export const fetchAllUsers = async (): Promise<User[]> => {
   try {
-    const { data } = await api.get('http://localhost:8000/api/auth/admin/users/')
+    const { data } = await api.get('/auth/admin/users/')
     return data
   } catch (err) {
     console.error('Error fetching users:', err);
@@ -25,10 +25,19 @@ export const fetchAllUsers = async (): Promise<User[]> => {
 
 export const updateUser = async (userId: number, updates: Partial<User>): Promise<User | null> => {
   try {
-    const { data } = await api.patch(`/http://localhost:8000/api/admin/users/${userId}/`, updates)
+    const { data } = await api.patch(`/auth/admin/users/${userId}/`, updates)
     return data
   } catch (err) {
     console.error('Error updating user:', err);
     return null;
+  }
+}
+
+export const deleteUser = async (userId: number): Promise<void> => {
+  try {
+    await api.delete(`/auth/admin/users/${userId}/`)
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    throw err;
   }
 }

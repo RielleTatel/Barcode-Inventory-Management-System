@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Trash2, Shield } from "lucide-react";
-import type { User } from "./index";
+import { Search, Trash2, Shield, Activity } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchAllUsers, deleteUser, type User } from "@/api/accountApi";
 import {
   Table,
   TableBody,
@@ -27,58 +28,43 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// ========== LOADING COMPONENT ==========
+const LoadingState = () => (
+  <div className="flex items-center justify-center h-64">
+    <div className="text-center">
+      <Activity className="h-12 w-12 animate-spin mx-auto mb-4" style={{ color: '#0033A0' }} />
+      <p className="text-gray-600">Loading users...</p>
+    </div>
+  </div>
+); 
+
+const QUERY_KEYS = {
+  APPROVED_USERS: ['users', 'approved']
+}
+
 const ApprovedUsers = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [actionType, setActionType] = useState<"remove" | null>(null);
 
-  const mockApprovedUsers: User[] = [
-    {
-      id: 1,
-      username: "admin_user",
-      email: "admin@barcode.com",
-      firstName: "Admin",
-      lastName: "User",
-      dateJoined: "2025-12-01T10:00:00Z",
-      isActive: true,
-      isSuperuser: true,
-      isStaff: true,
+  const queryClient = useQueryClient();
+
+    // Fetch all users and filter for pending (status = false)
+  const { data: allUsers = [], isLoading, error } = useQuery({
+    queryKey: QUERY_KEYS.APPROVED_USERS,
+    queryFn: fetchAllUsers,
+    select: (users) => users.filter(user => user.status === true),
+  });
+
+  // Mutation for deleting user
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId: number) => deleteUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.APPROVED_USERS });
     },
-    {
-      id: 2,
-      username: "sarah_manager",
-      email: "sarah.manager@barcode.com",
-      firstName: "Sarah",
-      lastName: "Manager",
-      dateJoined: "2025-12-15T14:30:00Z",
-      isActive: true,
-      isSuperuser: false,
-      isStaff: true,
-    },
-    {
-      id: 3,
-      username: "mike_staff",
-      email: "mike.staff@barcode.com",
-      firstName: "Mike",
-      lastName: "Staff",
-      dateJoined: "2026-01-05T09:20:00Z",
-      isActive: true,
-      isSuperuser: false,
-      isStaff: false,
-    },
-    {
-      id: 4,
-      username: "lisa_inactive",
-      email: "lisa.inactive@barcode.com",
-      firstName: "Lisa",
-      lastName: "Inactive",
-      dateJoined: "2025-11-20T11:45:00Z",
-      isActive: false,
-      isSuperuser: false,
-      isStaff: false,
-    },
-  ];
+  });
+
 
   const handleOpenDialog = (user: User, action: "remove") => {
     setSelectedUser(user);
@@ -90,31 +76,30 @@ const ApprovedUsers = () => {
     setActionType(null);
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
     if (!selectedUser || !actionType) return;
     
-    // TODO: API call to remove user
-    console.log(`${actionType} user:`, selectedUser);
+    await deleteUserMutation.mutateAsync(selectedUser.id);
     
     handleCloseDialog();
   };
 
-  const filteredUsers = mockApprovedUsers.filter((user) => {
+  const filteredUsers = allUsers.filter((user) => {
     const matchesSearch =
       user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchQuery.toLowerCase());
+      user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.last_name.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesFilter =
       filterStatus === "all" ||
-      (filterStatus === "active" && user.isActive) ||
-      (filterStatus === "inactive" && !user.isActive) ||
-      (filterStatus === "admin" && user.isSuperuser) ||
-      (filterStatus === "staff" && user.isStaff && !user.isSuperuser);
+      (filterStatus === "active" && user.is_active) ||
+      (filterStatus === "inactive" && !user.is_active) ||
+      (filterStatus === "staff" && user.is_staff);
 
     return matchesSearch && matchesFilter;
   });
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -123,17 +108,27 @@ const ApprovedUsers = () => {
       month: "short",
       day: "numeric",
     });
-  };
+  }; 
+
+  if (isLoading) return <LoadingState />; 
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center text-red-600">
+          <p>Error loading approved users</p>
+        </div>
+      </div>
+    );
+  }
 
   const getUserRole = (user: User): string => {
-    if (user.isSuperuser) return "Admin";
-    if (user.isStaff) return "Staff";
+    if (user.is_staff) return "Staff";
     return "User";
   };
 
   const getRoleBadgeClass = (user: User): string => {
-    if (user.isSuperuser) return "bg-purple-100 text-purple-700";
-    if (user.isStaff) return "bg-blue-100 text-blue-700";
+    if (user.is_staff) return "bg-blue-100 text-blue-700";
     return "bg-gray-100 text-gray-700";
   };
 
@@ -195,7 +190,7 @@ const ApprovedUsers = () => {
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.username}</TableCell>
                     <TableCell>
-                      {user.firstName} {user.lastName}
+                      {user.first_name} {user.last_name}
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
@@ -204,16 +199,16 @@ const ApprovedUsers = () => {
                           user
                         )}`}
                       >
-                        {user.isSuperuser && <Shield className="w-3 h-3 mr-1" />}
+                        {user.is_staff && <Shield className="w-3 h-3 mr-1" />}
                         {getUserRole(user)}
                       </span>
                     </TableCell>
                     <TableCell className="text-sm text-gray-600">
-                      {formatDate(user.dateJoined)}
+                      {formatDate(user.date_joined)}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        {!user.isSuperuser ? (
+                        {!user.is_staff ? (
                           <Button
                             size="sm"
                             variant="outline"

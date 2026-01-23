@@ -37,7 +37,8 @@ const QUERY_KEYS = {
   PENDING_USERS: ['users', 'pending'],
 };
 
-const PendingUsers = () => {
+const PendingUsers = () => { 
+  
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);

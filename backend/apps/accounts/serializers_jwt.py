@@ -1,6 +1,8 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -15,27 +17,25 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
-    pass  # Inherits from parent, will use the same token generation from CustomTokenObtainPairSerializer
-
-
-class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         
-        # Decode the refresh token to get user info
+        # Get the refresh token to extract user_id
         refresh = RefreshToken(attrs['refresh'])
         
-        # Get the user from the token
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        user = User.objects.get(id=refresh['user_id'])
-        
-        # Create new access token with custom claims
-        access = refresh.access_token
-        access['email'] = user.email
-        access['status'] = user.status
-        access['role'] = 'admin' if user.is_superuser else 'user'
-        
-        data['access'] = str(access)
+        try:
+            # Get the user from the database
+            user = User.objects.get(id=refresh['user_id'])
+            
+            # Create new access token with custom claims using our custom serializer
+            new_refresh = CustomTokenObtainPairSerializer.get_token(user)
+            
+            # Override the access token with one that has custom claims
+            data['access'] = str(new_refresh.access_token)
+            
+        except User.DoesNotExist:
+            # If user doesn't exist, just return the default token
+            # This will still work but without custom claims
+            pass
         
         return data

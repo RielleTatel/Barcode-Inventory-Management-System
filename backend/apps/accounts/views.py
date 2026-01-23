@@ -11,18 +11,29 @@ class CookieTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     
     def finalize_response(self, request, response, *args, **kwargs):
+        print(f"🔍 finalize_response called")
+        print(f"📦 Response data keys: {response.data.keys() if hasattr(response, 'data') else 'No data'}")
+        
         if response.data.get('refresh'):
+            print(f"🍪 Setting refresh_token cookie")
             cookie_max_age = 3600 * 24 * 7 # 7 days
             response.set_cookie(
                 'refresh_token', 
                 response.data['refresh'], 
                 max_age=cookie_max_age, 
-                httponly=True, 
+                httponly=False,  # NOTE: Set to True in production! False only for localhost development
                 samesite='Lax',
                 secure=False,  # Set to True in production with HTTPS
-                domain=None    # Allow cookie on localhost
+                path='/',
+                domain='localhost'
             )
+            print(f"🍪 Cookie value (first 20 chars): {response.data['refresh'][:20]}...")
+            print(f"🍪 Cookie settings: domain=localhost, path=/, httponly=False, samesite=Lax")
             del response.data['refresh'] # Remove from JSON body
+            print(f"✅ Cookie set successfully")
+        else:
+            print(f"❌ No refresh token in response data")
+        
         return super().finalize_response(request, response, *args, **kwargs)
 
 
@@ -47,8 +58,8 @@ class AdminUserListView(generics.ListAPIView):
     # Security: Only allow Superadmins to see this list
     permission_classes = [permissions.IsAdminUser]
 
-    # 2. UPDATE USER (Activate): To approve a specific user
-class AdminUserUpdateView(generics.UpdateAPIView):
+    # 2. UPDATE/DELETE USER: Approve, update, or remove users
+class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = AdminUserSerializer
     permission_classes = [permissions.IsAdminUser]
@@ -59,3 +70,9 @@ class AdminUserUpdateView(generics.UpdateAPIView):
         if instance.status:  # If Superadmin set 'status' to True
             instance.is_active = True
             instance.save()
+
+# 3. DELETE USER: Remove a user from the system
+class AdminUserDeleteView(generics.DestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = [permissions.IsAdminUser]
