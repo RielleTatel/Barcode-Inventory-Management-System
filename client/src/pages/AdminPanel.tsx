@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useTabWithUrl } from "@/hooks/useTabWithUrl";
-import PendingUsers from "@/components/admin-components/PendingUsers";
-import ApprovedUsers from "@/components/admin-components/ApprovedUsers";
+import PendingUsers from "@/components/admin/PendingUsers";
+import ApprovedUsers from "@/components/admin/ApprovedUsers";
 
 const adminTabs = [
   { key: "pending", label: "Pending Approvals" },

@@ -1,5 +1,5 @@
-import { KpiCards } from '@/components/dashboard-components/KpiCards';
-import type { InventoryKpiData } from '@/components/dashboard-components/KpiCards';
+import { KpiCards } from '@/components/dashboard/KpiCards';
+import type { InventoryKpiData } from '@/components/dashboard/KpiCards';
 
 
 

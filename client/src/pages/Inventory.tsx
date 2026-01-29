@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { InventoryTabs } from "@/components/ui/tabs";
 import { useTabWithUrl } from "@/hooks/useTabWithUrl";
-import Inventories from "@/components/inventory-components/Inventories";
-import Consumption from "@/components/inventory-components/Consumption";
-import Transfer from "@/components/inventory-components/Transfer";
+import Inventories from "@/components/inventory/Inventories";
+import Consumption from "@/components/inventory/Consumption";
+import Transfer from "@/components/inventory/Transfer";
 
 const Inventory = () => {
   const [activeTab, handleTabChange] = useTabWithUrl("inventories"); 

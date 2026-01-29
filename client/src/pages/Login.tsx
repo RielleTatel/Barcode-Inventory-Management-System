@@ -34,7 +34,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   setLoading(true);
 
   try {
-    console.log('🔐 Attempting login...');
     const response = await fetch('http://localhost:8000/api/auth/login/', {
       method: 'POST',
       headers: {
@@ -47,24 +46,17 @@ const handleSubmit = async (e: React.FormEvent) => {
       }),
     });
 
-    console.log('📡 Response status:', response.status);
-    console.log('📡 Response headers:', [...response.headers.entries()]);
-
     if (!response.ok) {
       throw new Error('Invalid credentials');
     }
 
     const data = await response.json();
-    console.log('📦 Response data:', data);
-    console.log('🍪 Cookies after login:', document.cookie);
     
     // Use AuthContext login function to set auth state
     login(data.access);
     
-    console.log('✅ Navigating to dashboard...');
     navigate('/dashboard');
   } catch (err) {
-    console.error('❌ Login error:', err);
     setError(err instanceof Error ? err.message : 'Login failed');
   } finally {
     setLoading(false);

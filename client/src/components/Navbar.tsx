@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import UserProfile from "./ui/userProfile";
 import {
   LayoutDashboard,
   ChefHat,
@@ -45,18 +46,7 @@ const Navbar = () => {
   return (
     <div className="shadow-md h-auto min-h-full w-70 bg-white rounded-[40px] p-5 flex flex-col gap-1 font-sans text-text-color self-stretch border border-[#E5E5E5]">
 
-      <div className="w-full bg-inner-background h-25 rounded-[10px] flex flex-row items-center px-2 gap-1 justify-center">
-        <div className="w-15 h-15 rounded-full bg-white flex items-center justify-center overflow-hidden">
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
-            Logo
-          </div>
-        </div>
-        <div className="flex flex-col leading-none text-left ml-2 text-text-color">
-          <span className="text-[13px] font-bold mb-1">Barcode Restaurant</span>
-          <span className="text-[11px]">Barcode@gmail.com</span>
-        </div>
-      </div>
-
+    <UserProfile/> 
       <nav className="flex flex-col flex-1">
         <div className="w-full mt-4 mb-2 text-left">
           <p className="text-xs font-bold uppercase tracking-wide text-text-blur">

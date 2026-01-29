@@ -1,7 +1,6 @@
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import generics, permissions
-from .serializers import RegisterSerializer, AdminUserSerializer
-from .serializers_jwt import CustomTokenObtainPairSerializer, CustomTokenRefreshSerializer
+from .serializers import RegisterSerializer, AdminUserSerializer, CustomTokenObtainPairSerializer, CustomTokenRefreshSerializer
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 
@@ -10,12 +9,8 @@ User = get_user_model();
 class CookieTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     
-    def finalize_response(self, request, response, *args, **kwargs):
-        print(f"🔍 finalize_response called")
-        print(f"📦 Response data keys: {response.data.keys() if hasattr(response, 'data') else 'No data'}")
-        
+    def finalize_response(self, request, response, *args, **kwargs):        
         if response.data.get('refresh'):
-            print(f"🍪 Setting refresh_token cookie")
             cookie_max_age = 3600 * 24 * 7 # 7 days
             response.set_cookie(
                 'refresh_token', 
@@ -27,12 +22,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 path='/',
                 domain='localhost'
             )
-            print(f"🍪 Cookie value (first 20 chars): {response.data['refresh'][:20]}...")
-            print(f"🍪 Cookie settings: domain=localhost, path=/, httponly=False, samesite=Lax")
             del response.data['refresh'] # Remove from JSON body
-            print(f"✅ Cookie set successfully")
-        else:
-            print(f"❌ No refresh token in response data")
         
         return super().finalize_response(request, response, *args, **kwargs)
 

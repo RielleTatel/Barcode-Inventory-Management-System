@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { SupplyTabs } from "@/components/ui/tabs";
 import { useTabWithUrl } from "@/hooks/useTabWithUrl";
-import ReceiveDelivery from "@/components/supply-components/ReceiveDelivery";
-import SupplierDirectory from "@/components/supply-components/SuppilerDirectory";
-import PurchaseHistory from "@/components/supply-components/PurchaseHistory";
+import ReceiveDelivery from "@/components/supply/ReceiveDelivery";
+import SupplierDirectory from "@/components/supply/SuppilerDirectory";
+import PurchaseHistory from "@/components/supply/PurchaseHistory";
 
 const Supply = () => { 
   const [activeTab, handleTabChange] = useTabWithUrl("receive-delivery");

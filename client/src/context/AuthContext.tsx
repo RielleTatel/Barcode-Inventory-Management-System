@@ -21,33 +21,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const checkAuth = async () => { 
-      console.log('🔍 Checking authentication...');
-      console.log('🍪 All cookies:', document.cookie);
       const hasToken = document.cookie.includes('refresh_token');
-      console.log('🍪 Has refresh token:', hasToken);
-      
+    
       if (!hasToken) {
-        console.log('❌ No refresh token found, skipping auth check');
         setIsInitialized(true);
         return;
       }
 
       try {
-        console.log('🔄 Calling refresh endpoint...');
         const { data } = await api.post('/auth/refresh/'); 
-        console.log('✅ Refresh successful:', data);
         setAuthData(data.access);
       } catch (error) {
-        console.error('❌ Refresh failed:', error);
-        // Clear invalid auth data
         setUser(null);
         setAccessToken(null);
         localStorage.removeItem('access_token');
-        // Clear the invalid cookie
+
         document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       } finally {
         setIsInitialized(true);
-        console.log('✅ Auth initialization complete');
       }
     };
     checkAuth();
