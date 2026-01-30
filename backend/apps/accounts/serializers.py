@@ -51,22 +51,16 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         
-        # Get the refresh token to extract user_id
         refresh = RefreshToken(attrs['refresh'])
         
         try:
-            # Get the user from the database
             user = User.objects.get(id=refresh['user_id'])
             
-            # Create new access token with custom claims using our custom serializer
             new_refresh = CustomTokenObtainPairSerializer.get_token(user)
             
-            # Override the access token with one that has custom claims
             data['access'] = str(new_refresh.access_token)
             
         except User.DoesNotExist:
-            # If user doesn't exist, just return the default token
-            # This will still work but without custom claims
             pass
         
         return data

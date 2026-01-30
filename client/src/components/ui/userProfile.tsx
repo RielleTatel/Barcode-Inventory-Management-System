@@ -1,4 +1,3 @@
-import { Circle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const userProfile = () => { 
