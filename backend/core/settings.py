@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'apps.inventory', 
     'apps.menusAndRecipes',
     'apps.transfer', 
-    'apps.salesAndCatering'
+    'apps.salesAndCatering',
+    'apps.supply'
 ]
 
 MIDDLEWARE = [
