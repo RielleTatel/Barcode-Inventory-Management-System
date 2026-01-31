@@ -57,14 +57,11 @@ INSTALLED_APPS = [
     'apps.accounts', 
 
     'apps.bomConsumption', 
-
     'apps.branches', 
-
     'apps.inventory', 
-
     'apps.menusAndRecipes',
-
-    'apps.transfer' 
+    'apps.transfer', 
+    'apps.salesAndCatering'
 ]
 
 MIDDLEWARE = [

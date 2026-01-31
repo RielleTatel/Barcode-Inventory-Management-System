@@ -13,7 +13,7 @@ class TransferRequest(models.Model):
         ('completed', 'Completed'),
         ('rejected', 'Rejected'),
     )
-    4
+    
     source_branch = models.ForeignKey(Branch, on_delete=models.PROTECT, related_name='outgoing_transfers')  # Where stock comes from (Kitchen)
     dest_branch = models.ForeignKey(Branch, on_delete=models.PROTECT, related_name='incoming_transfers')  # Where stock goes (Café)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
