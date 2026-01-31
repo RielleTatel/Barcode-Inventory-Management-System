@@ -55,8 +55,16 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'apps.accounts', 
+
     'apps.bomConsumption', 
+
     'apps.branches', 
+
+    'apps.inventory', 
+
+    'apps.menusAndRecipes',
+
+    'apps.transfer' 
 ]
 
 MIDDLEWARE = [

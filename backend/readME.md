@@ -1,5 +1,3 @@
-
-
 Based on the Barcode IMS requirements and pages we have designed, here is the recommended PostgreSQL Database Schema.
 I have organized this by module (Inventory, Menu, Transfers, etc.) to match the pages.
 
