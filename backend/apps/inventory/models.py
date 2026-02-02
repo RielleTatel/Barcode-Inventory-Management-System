@@ -39,7 +39,6 @@ class StockLevel(models.Model):
         return f"{self.item.name} - {self.branch.name}: {self.quantity} {self.item.uom}"
 
 class StockAdjustment(models.Model):
-    """Wastage and stock adjustment logs"""
     ADJUSTMENT_TYPES = (
         ('wastage', 'Wastage'),
         ('spoilage', 'Spoilage'),

@@ -1,8 +1,12 @@
-import { useState } from "react"
+import { useState } from "react"; 
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Pencil, Eye, Trash2 } from "lucide-react";
+import AddMenuItemModal from "@/components/menus&Recipes/AddMenuItemModal";
+import type { MenuItemFormData } from "@/components/menus&Recipes";
+
 import {
   Select,
   SelectContent,
@@ -68,19 +72,33 @@ const mockMenuData: MenuItem[] = [
 ];
 
 const MenusAndRecipes = () => { 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const openModal = () => {
+    setIsAddModalOpen(true); 
+  }
+
+  const handleSaveMenuItem = (data: MenuItemFormData) => {
+    console.log('Saving menu item:', data);
+    // TODO: Add API call to save menu item
+  }
 
   return (
     <div className="flex flex-col h-full w-full gap-y-6">
 
     <div className="rounded-xl p-2 flex flex-row gap-x-4">
       <div className="flex flex-col">
-        <p className="text-[32px] font-bold"> Menu Master List & Recipe Management </p> 
-        <p className="text-md">Manage Your Food Menu </p> 
+        <p
+          onClick={openModal}
+          className="text-[32px] font-bold"
+        >
+          Menu Master List & Recipe Management
+        </p>
       </div>
 
       <div className="flex gap-3 items-center">
         <Button variant="outline">Export</Button>
-        <Button>Add Product</Button>
+        <Button onClick={openModal}>Add Product</Button>
       </div>  
     </div>  
 
@@ -174,6 +192,13 @@ const MenusAndRecipes = () => {
           </Table> 
         </div>
        </div>
+
+      <AddMenuItemModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleSaveMenuItem}
+      /> 
+      
     </div>
   );
 };
