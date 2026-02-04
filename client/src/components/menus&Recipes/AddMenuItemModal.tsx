@@ -19,8 +19,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-
+} from "@/components/ui/dialog"; 
 
 const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) => {
   const [formData, setFormData] = useState<MenuItemFormData>({
@@ -38,7 +37,8 @@ const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) =>
     },
   });
 
-  const [selectedIngredient, setSelectedIngredient] = useState("");
+  const [selectedIngredient, setSelectedIngredient] = useState(""); 
+
   
   const availableIngredients = [
     { id: "ING-001", name: "Beef Chuck" },

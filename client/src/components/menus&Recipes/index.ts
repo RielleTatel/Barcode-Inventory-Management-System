@@ -18,3 +18,9 @@ export interface MenuItemFormData {
     restoCafe: boolean;
   };
 }
+
+// Query keys for React Query
+export const MENU_QUERY_KEYS = {
+  MENU_ITEMS: ['menuItems'],
+  MENU_CATEGORIES: ['menuCategories'],
+} as const;

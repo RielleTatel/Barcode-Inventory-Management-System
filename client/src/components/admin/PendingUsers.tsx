@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Check, X, Search } from "lucide-react";
-import { Activity } from 'lucide-react';
+import LoadingState from "../ui/loadingState";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchAllUsers, updateUser, type User } from "@/api/accountApi";
 import {
@@ -21,16 +21,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-// ========== LOADING COMPONENT ==========
-const LoadingState = () => (
-  <div className="flex items-center justify-center h-64">
-    <div className="text-center">
-      <Activity className="h-12 w-12 animate-spin mx-auto mb-4" style={{ color: '#0033A0' }} />
-      <p className="text-gray-600">Loading health data...</p>
-    </div>
-  </div>
-); 
 
   // ========== QUERY KEYS ==========
 const QUERY_KEYS = {

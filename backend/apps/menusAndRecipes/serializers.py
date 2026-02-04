@@ -15,7 +15,6 @@ class MenuCategorySerializer(serializers.ModelSerializer):
     def get_menu_items_count(self, obj):
         return obj.menu_items.count()
 
-
 class RecipeSerializer(serializers.ModelSerializer):
 
     inventory_item_name = serializers.CharField(source='inventory_item.name', read_only=True)

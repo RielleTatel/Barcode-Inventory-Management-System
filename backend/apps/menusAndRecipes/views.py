@@ -15,7 +15,6 @@ from .serializers import (
     RecipeCreateSerializer
 )
 
-
 class MenuCategoryViewSet(viewsets.ModelViewSet):
 
     queryset = MenuCategory.objects.all()
@@ -141,10 +140,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         
         try:
             with transaction.atomic():
-                # Delete existing recipes for this menu item
+
                 menu_item.recipes.all().delete()
                 
-                # Create new recipes
                 recipes = []
                 for recipe_data in recipes_data:
                     recipe_data['menu_item'] = menu_item_id
