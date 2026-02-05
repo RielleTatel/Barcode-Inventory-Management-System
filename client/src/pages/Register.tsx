@@ -63,7 +63,7 @@ export default function Register() {
 
     setLoading(true);
 
-    try {
+    try { 
       await axios.post(
         'http://localhost:8000/api/auth/register/',
         formData

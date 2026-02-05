@@ -1,17 +1,5 @@
 import api from "@/hooks/api";
-
-export interface MenuItem {
-  id: number;
-  sku: string;
-  name: string;
-  menu_category: number;
-  menu_category_name: string;
-  price: string;
-  is_available_cafe: boolean;
-  recipe_count: number;
-  created_at: string;
-  updated_at: string;
-}
+import type { MenuItemFormData, MenuItem } from ".";
 
 export interface MenuCategory {
   id: number;
@@ -29,12 +17,12 @@ export const fetchMenuCategories = async (): Promise<MenuCategory[]> => {
   return data;
 };
 
-export const createMenuItem = async (menuItem: Partial<MenuItem>): Promise<MenuItem> => {
+export const createMenuItem = async (menuItem: Partial<MenuItemFormData>): Promise<MenuItemFormData> => {
   const { data } = await api.post('/menus/items/', menuItem);
   return data;
 };
 
-export const updateMenuItem = async (id: number, updates: Partial<MenuItem>): Promise<MenuItem> => {
+export const updateMenuItem = async (id: number, updates: Partial<MenuItemFormData>): Promise<MenuItemFormData> => {
   const { data } = await api.patch(`/menus/items/${id}/`, updates);
   return data;
 };

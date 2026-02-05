@@ -19,6 +19,16 @@ export interface MenuItemFormData {
   };
 }
 
+// API response interface
+export interface MenuItem {
+  id: number;
+  name: string;
+  sku: string;
+  menu_category_name: string;
+  price: string;
+  is_available_cafe: boolean;
+}
+
 // Query keys for React Query
 export const MENU_QUERY_KEYS = {
   MENU_ITEMS: ['menuItems'],

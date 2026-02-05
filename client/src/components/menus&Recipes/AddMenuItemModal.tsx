@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import type { AddMenuItemModalProps, MenuItemFormData } from ".";
+import { createMenuItem, fetchMenuCategories } from "./api";
+import type { AddMenuItemModalProps, MenuItemFormData } from ".";import { MENU_QUERY_KEYS } from ".";
 import {
   Select,
   SelectContent,
@@ -39,7 +41,12 @@ const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) =>
 
   const [selectedIngredient, setSelectedIngredient] = useState(""); 
 
-  
+  // Fetch menu categories
+  const { data: categories = [] } = useQuery({
+    queryKey: MENU_QUERY_KEYS.MENU_CATEGORIES,
+    queryFn: fetchMenuCategories,
+  });
+
   const availableIngredients = [
     { id: "ING-001", name: "Beef Chuck" },
     { id: "ING-002", name: "Onions" },
@@ -70,9 +77,66 @@ const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) =>
     });
   };
 
-  const handleSubmit = () => {
-    onSave(formData);
-    onClose();
+  const handleSubmit = async () => {
+    // Validate form data before submitting
+    if (!formData.sku.trim()) {
+      alert("SKU is required");
+      return;
+    }
+    if (!formData.itemName.trim()) {
+      alert("Item name is required");
+      return;
+    }
+    if (!formData.salesCategory) {
+      alert("Please select a category");
+      return;
+    }
+    if (!formData.sellingPrice || Number(formData.sellingPrice) <= 0) {
+      alert("Valid selling price is required");
+      return;
+    }
+
+    try {
+      const payload = {
+        sku: formData.sku.trim(),
+        name: formData.itemName.trim(),
+        menu_category: Number(formData.salesCategory), 
+        price: Number(formData.sellingPrice),
+        is_available_cafe: formData.availability.restoCafe,
+      };
+
+      console.log("Submitting payload:", payload);
+
+      const newItem = await createMenuItem(payload);
+
+      console.log("Created menu item:", newItem);
+      
+      onSave(formData);
+      onClose();
+    } catch (error: any) {
+      console.error("Full error:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      
+      // Extract all error messages
+      const errorData = error.response?.data;
+      let errorMessages: string[] = ["Failed to create menu item:"];
+      
+      if (errorData) {
+        Object.keys(errorData).forEach(key => {
+          const messages = Array.isArray(errorData[key]) ? errorData[key] : [errorData[key]];
+          console.log(`${key} errors:`, messages); // Log each field error
+          const fieldLabel = key.toUpperCase().replace('_', ' ');
+          errorMessages.push(`• ${fieldLabel}: ${messages.join(", ")}`);
+        });
+      } else {
+        errorMessages.push(error.message);
+      }
+      
+      const errorMessage = errorMessages.join("\n");
+      console.log("Alert message:", errorMessage);
+      alert(errorMessage);
+    }
   };
 
   return (
@@ -120,7 +184,7 @@ const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) =>
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">
-                Sales Category
+                Sales Category *
               </label>
               <Select
                 value={formData.salesCategory}
@@ -129,15 +193,15 @@ const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) =>
                 }
               >
                 <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Silog Express" />
+                  <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="silog-express">Silog Express</SelectItem>
-                    <SelectItem value="beef-viands">Beef Viands</SelectItem>
-                    <SelectItem value="cater-to-go">Cater to Go</SelectItem>
-                    <SelectItem value="appetizer">Appetizer</SelectItem>
-                    <SelectItem value="dessert">Dessert</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
