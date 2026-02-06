@@ -12,6 +12,11 @@ export const fetchAllMenuItems = async (): Promise<MenuItem[]> => {
   return data;
 };
 
+export const fetchMenuItemById = async (id: number): Promise<MenuItem> => {
+  const { data } = await api.get(`/menus/items/${id}/`);
+  return data;
+};
+
 export const fetchMenuCategories = async (): Promise<MenuCategory[]> => {
   const { data } = await api.get('/menus/categories/');
   return data;

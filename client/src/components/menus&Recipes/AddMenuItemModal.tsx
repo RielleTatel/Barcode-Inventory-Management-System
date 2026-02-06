@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"; 
 
-const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) => {
+const AddMenuItemModal = ({ isOpen, onClose }: AddMenuItemModalProps) => {
   const [formData, setFormData] = useState<MenuItemFormData>({
     itemName: "",
     sku: "",
@@ -41,7 +41,6 @@ const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) =>
 
   const [selectedIngredient, setSelectedIngredient] = useState(""); 
 
-  // Fetch menu categories
   const { data: categories = [] } = useQuery({
     queryKey: MENU_QUERY_KEYS.MENU_CATEGORIES,
     queryFn: fetchMenuCategories,
@@ -78,7 +77,7 @@ const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) =>
   };
 
   const handleSubmit = async () => {
-    // Validate form data before submitting
+
     if (!formData.sku.trim()) {
       alert("SKU is required");
       return;
@@ -105,36 +104,12 @@ const AddMenuItemModal = ({ isOpen, onClose, onSave }: AddMenuItemModalProps) =>
         is_available_cafe: formData.availability.restoCafe,
       };
 
-      console.log("Submitting payload:", payload);
-
       const newItem = await createMenuItem(payload);
-
-      console.log("Created menu item:", newItem);
       
-      onSave(formData);
       onClose();
     } catch (error: any) {
-      console.error("Full error:", error);
-      console.error("Error response:", error.response?.data);
-      console.error("Error status:", error.response?.status);
-      
-      // Extract all error messages
-      const errorData = error.response?.data;
       let errorMessages: string[] = ["Failed to create menu item:"];
-      
-      if (errorData) {
-        Object.keys(errorData).forEach(key => {
-          const messages = Array.isArray(errorData[key]) ? errorData[key] : [errorData[key]];
-          console.log(`${key} errors:`, messages); // Log each field error
-          const fieldLabel = key.toUpperCase().replace('_', ' ');
-          errorMessages.push(`• ${fieldLabel}: ${messages.join(", ")}`);
-        });
-      } else {
-        errorMessages.push(error.message);
-      }
-      
       const errorMessage = errorMessages.join("\n");
-      console.log("Alert message:", errorMessage);
       alert(errorMessage);
     }
   };

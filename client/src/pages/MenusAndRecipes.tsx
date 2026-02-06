@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Pencil, Eye, Trash2 } from "lucide-react";
-import AddMenuItemModal from "@/components/menus&Recipes/AddMenuItemModal";
-import type { MenuItemFormData } from "@/components/menus&Recipes";
+import MenuItemModal, { type ModalMode } from "@/components/menus&Recipes/MenuItemModal";
+import type { MenuItem } from "@/components/menus&Recipes";
 import { fetchAllMenuItems } from "@/components/menus&Recipes/api";
 import { MENU_QUERY_KEYS } from "@/components/menus&Recipes";
 import LoadingState from "@/components/ui/loadingState";
@@ -30,7 +30,15 @@ import {
 } from "@/components/ui/table" 
 
 const MenusAndRecipes = () => { 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    mode: ModalMode;
+    menuItem?: MenuItem;
+  }>({
+    isOpen: false,
+    mode: 'add',
+  });
+  
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedBranch, setSelectedBranch] = useState<string>("all");
 
@@ -53,31 +61,49 @@ const MenusAndRecipes = () => {
     return matchesSearch && matchesBranch;
   });
 
-  const openModal = () => {
-    setIsAddModalOpen(true); 
-  }
+  const openAddModal = () => {
+    setModalState({
+      isOpen: true,
+      mode: 'add',
+    });
+  };
 
-  const handleSaveMenuItem = (data: MenuItemFormData) => {
-    console.log('Saving menu item:', data);
-    // TODO: Add API call to save menu item
-  }
+  const openViewModal = (item: MenuItem) => {
+    setModalState({
+      isOpen: true,
+      mode: 'view',
+      menuItem: item,
+    });
+  };
+
+  const openEditModal = (item: MenuItem) => {
+    setModalState({
+      isOpen: true,
+      mode: 'edit',
+      menuItem: item,
+    });
+  };
+
+  const closeModal = () => {
+    setModalState({
+      isOpen: false,
+      mode: 'add',
+    });
+  };
 
   return (
     <div className="flex flex-col h-full w-full gap-y-6">
 
     <div className="rounded-xl p-2 flex flex-row gap-x-4">
       <div className="flex flex-col">
-        <p
-          onClick={openModal}
-          className="text-[32px] font-bold"
-        >
+        <p className="text-[32px] font-bold">
           Menu Master List & Recipe Management
         </p>
       </div>
 
       <div className="flex gap-3 items-center">
         <Button variant="outline">Export</Button>
-        <Button onClick={openModal}>Add Product</Button>
+        <Button onClick={openAddModal}>Add Product</Button>
       </div>  
     </div>  
 
@@ -167,21 +193,21 @@ const MenusAndRecipes = () => {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => console.log('View', item.id)}
+                        onClick={() => openViewModal(item)}
                         className="p-1 hover:bg-gray-100 rounded"
                         title="View"
                       >
                         <Eye className="w-4 h-4 text-blue-600" />
                       </button>
                       <button
-                        onClick={() => console.log('Edit', item.id)}
+                        onClick={() => openEditModal(item)}
                         className="p-1 hover:bg-gray-100 rounded"
                         title="Edit"
                       >
                         <Pencil className="w-4 h-4 text-green-600" />
                       </button>
                       <button
-                        onClick={() => console.log('Delete', item.id)}
+                        onClick={() => openViewModal(item)}
                         className="p-1 hover:bg-gray-100 rounded"
                         title="Delete"
                       >
@@ -197,10 +223,11 @@ const MenusAndRecipes = () => {
         </div>
        </div>
 
-      <AddMenuItemModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSave={handleSaveMenuItem}
+      <MenuItemModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        mode={modalState.mode}
+        menuItem={modalState.menuItem}
       /> 
       
     </div>
