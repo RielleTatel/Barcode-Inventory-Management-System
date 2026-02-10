@@ -171,7 +171,7 @@ const AddMenuItemModal = ({ isOpen, onClose }: AddMenuItemModalProps) => {
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup>
+                  <SelectGroup> 
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
                         {category.name}

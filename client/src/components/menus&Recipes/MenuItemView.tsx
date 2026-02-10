@@ -9,53 +9,53 @@ interface MenuItemViewProps {
 const MenuItemView = ({ menuItem }: MenuItemViewProps) => {
   return (
     <div className="space-y-6">
-      {/* Row 1: Item Name and SKU */}
-      <div className="grid grid-cols-2 gap-6">
-        <InfoField 
-          label="Menu Item Name" 
-          value={menuItem.name} 
-        />
-        <InfoField 
-          label="Menu SKU" 
-          value={menuItem.sku} 
-        />
+      {/* Main Information Card */}
+      <div className="bg-gray-50 rounded-lg p-6 space-y-5">
+        <div className="grid grid-cols-2 gap-6">
+          <InfoField 
+            label="Menu Item Name" 
+            value={menuItem.name} 
+          />
+          <InfoField 
+            label="Menu SKU" 
+            value={menuItem.sku} 
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <InfoField 
+            label="Category" 
+            value={menuItem.menu_category_name} 
+          />
+          <InfoField 
+            label="Selling Price" 
+            value={`₱${parseFloat(menuItem.price).toFixed(2)}`} 
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <InfoField 
+            label="Unit" 
+            value="serving" 
+          />
+          <InfoField 
+            label="Availability" 
+            value={
+              <span className={`px-3 py-1 rounded-full text-sm font-medium inline-block ${
+                menuItem.is_available_cafe
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}>
+                {menuItem.is_available_cafe ? "Available in Cafe" : "Not Available"}
+              </span>
+            } 
+          />
+        </div>
       </div>
 
-      {/* Row 2: Category and Price */}
-      <div className="grid grid-cols-2 gap-6">
-        <InfoField 
-          label="Category" 
-          value={menuItem.menu_category_name} 
-        />
-        <InfoField 
-          label="Selling Price" 
-          value={`₱${parseFloat(menuItem.price).toFixed(2)}`} 
-        />
-      </div>
-
-      {/* Row 3: Unit and Availability */}
-      <div className="grid grid-cols-2 gap-6">
-        <InfoField 
-          label="Unit" 
-          value="serving" 
-        />
-        <InfoField 
-          label="Availability" 
-          value={
-            <span className={`px-3 py-1 rounded-full text-sm font-medium inline-block ${
-              menuItem.is_available_cafe
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}>
-              {menuItem.is_available_cafe ? "Available in Cafe" : "Not Available"}
-            </span>
-          } 
-        />
-      </div>
-
-      {/* Additional Info Section */}
-      <div className="border-t pt-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Additional Information</h3>
+      {/* Additional Info Card */}
+      <div className="bg-gray-50 rounded-lg p-6">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Additional Information</h3>
         <div className="grid grid-cols-2 gap-6">
           <InfoField 
             label="Menu ID" 

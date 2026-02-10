@@ -6,9 +6,9 @@ interface InfoFieldProps {
 
 const InfoField = ({ label, value, className = "" }: InfoFieldProps) => {
   return (
-    <div className={`space-y-1 ${className}`}>
-      <label className="text-sm font-semibold text-gray-700">{label}</label>
-      <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-md border border-gray-200">
+    <div className={`space-y-2 ${className}`}>
+      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</label>
+      <div className="text-base text-gray-900 font-medium">
         {value}
       </div>
     </div>

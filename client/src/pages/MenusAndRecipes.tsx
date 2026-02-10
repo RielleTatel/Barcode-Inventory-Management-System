@@ -46,7 +46,7 @@ const MenusAndRecipes = () => {
   const { data: menuItems = [], isLoading, error, refetch } = useQuery({
     queryKey: MENU_QUERY_KEYS.MENU_ITEMS,
     queryFn: fetchAllMenuItems,
-  });
+  }); 
 
   // Filter menu items based on search query and branch
   const filteredMenuItems = menuItems.filter(item => {
