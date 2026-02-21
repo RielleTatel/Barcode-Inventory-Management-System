@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Pencil, Eye, Trash2 } from "lucide-react";
 import MenuItemModal, { type ModalMode } from "@/components/menus&Recipes/MenuItemModal";
+import { AddNewBranchModal } from "@/components/menus&Recipes/AddNewBranchModal";
 import type { MenuItem } from "@/components/menus&Recipes";
 import { fetchAllMenuItems } from "@/components/menus&Recipes/api";
 import { MENU_QUERY_KEYS } from "@/components/menus&Recipes";
@@ -94,18 +95,19 @@ const MenusAndRecipes = () => {
   return (
     <div className="flex flex-col h-full w-full gap-y-6">
 
-    <div className="rounded-xl p-2 flex flex-row gap-x-4">
-      <div className="flex flex-col">
-        <p className="text-[32px] font-bold">
-          Menu Master List & Recipe Management
-        </p>
-      </div>
 
-      <div className="flex gap-3 items-center">
-        <Button variant="outline">Export</Button>
-        <Button onClick={openAddModal}>Add Product</Button>
+      <div className="rounded-xl p-2 flex flex-row gap-x-4">
+        <div className="flex flex-col">
+          <p className="text-[32px] font-bold">
+            Menu Master List & Recipe Management
+          </p>
+        </div>
+
+        <div className="flex gap-3 items-center">
+          <Button variant="outline">Export</Button>
+          <Button onClick={openAddModal}>Add Product</Button>
+        </div>  
       </div>  
-    </div>  
 
       <div className="shadow-md bg-white rounded-xl flex-1 flex flex-col p-4 gap-y-4 border border-[#E5E5E5]">
         <div className="flex justify-between items-center gap-4 flex-wrap">
@@ -119,20 +121,33 @@ const MenusAndRecipes = () => {
             <Button onClick={() => refetch()}>Refresh</Button>
           </div>
 
-          <div className="flex gap-3">
-            <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-              <SelectTrigger className="w-45">
-                <SelectValue placeholder="Branch" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Branch</SelectLabel>
-                  <SelectItem value="all">All Branches</SelectItem>
-                  <SelectItem value="cafe">Cafe Only</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-row gap-x-2"> 
+            <div className="flex gap-3">
+              <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+                <SelectTrigger className="w-45">
+                  <SelectValue placeholder="Branch" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Branch</SelectLabel>
+                    <SelectItem value="all">All Branches</SelectItem>
+                    <SelectItem value="cafe">Cafe Only</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div> 
+
+            <div className="flex gap-3">
+              <AddNewBranchModal 
+                trigger={
+                  <Button> 
+                    Add branch
+                  </Button>
+                }
+              />
+            </div> 
           </div>
+
          </div>
 
         <div className="rounded-md border">

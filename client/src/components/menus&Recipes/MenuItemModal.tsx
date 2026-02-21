@@ -20,7 +20,7 @@ interface MenuItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   mode: ModalMode;
-  menuItem?: MenuItem; // undefined for "add", required for "view" & "edit"
+  menuItem?: MenuItem; 
 }
 
 const MenuItemModal = ({ isOpen, onClose, mode, menuItem }: MenuItemModalProps) => {
