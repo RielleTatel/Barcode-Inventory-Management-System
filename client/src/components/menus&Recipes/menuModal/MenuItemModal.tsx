@@ -10,9 +10,9 @@ import {
 import MenuItemView from "./MenuItemView";
 import MenuItemEdit, { type MenuItemEditFormData } from "./MenuItemEdit";
 import ModalActions from "@/components/ui/modal/ModalActions";
-import { createMenuItem, updateMenuItem, deleteMenuItem } from "./api";
-import { MENU_QUERY_KEYS } from ".";
-import type { MenuItem } from ".";
+import { createMenuItem, updateMenuItem, deleteMenuItem } from "../api";
+import { MENU_QUERY_KEYS } from "..";
+import type { MenuItem } from "..";
 
 export type ModalMode = 'view' | 'edit' | 'add';
 

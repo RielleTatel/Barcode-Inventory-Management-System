@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "../ui/input"
+import { Input } from "../../ui/input"
 import {
   Select,
   SelectContent,

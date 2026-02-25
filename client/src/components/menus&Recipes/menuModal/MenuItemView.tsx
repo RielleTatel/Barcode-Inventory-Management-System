@@ -1,6 +1,6 @@
 import InfoField from "@/components/ui/modal/InfoField";
 import { Badge } from "@/components/ui/badge";
-import type { MenuItem } from ".";
+import type { MenuItem } from "..";
 
 interface MenuItemViewProps {
   menuItem: MenuItem;

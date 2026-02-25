@@ -9,8 +9,8 @@ const Inventory = () => {
   const [activeTab, handleTabChange] = useTabWithUrl("inventories"); 
 
   const renderTabContent = () => {
-      switch (activeTab) {
-      case "inventories":
+      switch (activeTab) { 
+      case "inventories":  
         return <Inventories/>;
       case "consumption":
         return <Consumption/>;
@@ -28,11 +28,6 @@ const Inventory = () => {
           <p className="text-[32px] font-bold"> Inventory Management</p> 
           <p className="text-md">Manage Your Inventory </p> 
         </div>
-
-        <div className="flex gap-3 items-center">
-          <Button variant="outline">Export</Button>
-          <Button>Add Inventory </Button>
-        </div>  
       </div>  
 
         <InventoryTabs

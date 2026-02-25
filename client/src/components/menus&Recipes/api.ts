@@ -1,5 +1,5 @@
 import api from "@/hooks/api";
-import type { MenuItemFormData, MenuItem } from ".";
+import type { MenuItemFormData, MenuItem, Recipe, RecipeFormData } from ".";
 
 export interface MenuCategory {
   id: number;
@@ -36,4 +36,32 @@ export const deleteMenuItem = async (id: number): Promise<void> => {
   await api.delete(`/menus/items/${id}/`);
 }; 
 
+// Recipe API functions
+export const fetchAllRecipes = async (): Promise<Recipe[]> => {
+  const { data } = await api.get('/menus/recipes/');
+  return data;
+};
 
+export const fetchRecipeById = async (id: number): Promise<Recipe> => {
+  const { data } = await api.get(`/menus/recipes/${id}/`);
+  return data;
+};
+
+export const fetchRecipeByMenuItemId = async (menuItemId: number): Promise<Recipe> => {
+  const { data } = await api.get(`/menus/recipes/menu-item/${menuItemId}/`);
+  return data;
+};
+
+export const createRecipe = async (recipe: RecipeFormData): Promise<Recipe> => {
+  const { data } = await api.post('/menus/recipes/', recipe);
+  return data;
+};
+
+export const updateRecipe = async (id: number, updates: Partial<RecipeFormData>): Promise<Recipe> => {
+  const { data } = await api.patch(`/menus/recipes/${id}/`, updates);
+  return data;
+};
+
+export const deleteRecipe = async (id: number): Promise<void> => {
+  await api.delete(`/menus/recipes/${id}/`);
+};
