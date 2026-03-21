@@ -9,11 +9,11 @@ import Menus from "@/components/menus&Recipes/Menus";
 import Recipes from "@/components/menus&Recipes/Recipes";
 
 const MenusAndRecipes = () => {  
-    const [modalState, setModalState] = useState<{
+const [modalState, setModalState] = useState<{
     isOpen: boolean;
     mode: ModalMode;
     menuItem?: MenuItem;
-  }>({
+  }>({ 
     isOpen: false,
     mode: 'add',
   });
@@ -31,7 +31,7 @@ const MenusAndRecipes = () => {
     }
   } 
 
-    const openAddModal = () => {
+  const openAddModal = () => {
     setModalState({
       isOpen: true,
       mode: 'add',
@@ -73,7 +73,8 @@ const MenusAndRecipes = () => {
         <div className="flex gap-3 items-center">
           <Button variant="outline">Export</Button>
           <Button onClick={openAddModal}>Add Product</Button>
-        </div>  
+        </div>   
+
       </div> 
 
         <MenuAndRecipesTabs

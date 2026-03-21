@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
+import { 
   Dialog,
   DialogContent,
   DialogFooter,
@@ -11,8 +11,8 @@ import MenuItemView from "./MenuItemView";
 import MenuItemEdit, { type MenuItemEditFormData } from "./MenuItemEdit";
 import ModalActions from "@/components/ui/modal/ModalActions";
 import { createMenuItem, updateMenuItem, deleteMenuItem } from "../api";
-import { MENU_QUERY_KEYS } from "..";
-import type { MenuItem } from "..";
+import { MENU_QUERY_KEYS } from ".."; 
+import type { MenuItem } from ".."; 
 
 export type ModalMode = 'view' | 'edit' | 'add';
 
@@ -158,6 +158,7 @@ const MenuItemModal = ({ isOpen, onClose, mode, menuItem }: MenuItemModalProps) 
           </DialogTitle>
         </DialogHeader>
 
+      {/* The dialog modal body? */}
         <div className="py-4">
           {mode === 'view' && menuItem ? (
             <MenuItemView menuItem={menuItem} />

@@ -34,7 +34,7 @@ export interface RecipeEditFormData {
 }
 
 interface RecipeEditProps {
-  recipe?: Recipe; // undefined for add mode, present for edit mode
+  recipe?: Recipe;
   onChange: (data: RecipeEditFormData) => void;
   formData: RecipeEditFormData;
 }
@@ -45,20 +45,14 @@ const RecipeEdit = ({ recipe, onChange, formData }: RecipeEditProps) => {
     queryFn: fetchAllMenuItems,
   });
 
-  const handleChange = (field: keyof RecipeEditFormData, value: any) => {
-    onChange({
-      ...formData,
-      [field]: value,
-    });
+  const handleChange = (field: keyof RecipeEditFormData, value: RecipeEditFormData[typeof field]) => {
+    onChange({ ...formData, [field]: value });
   };
 
   const handleIngredientChange = (index: number, field: string, value: string) => {
-    const updatedIngredients = [...formData.ingredients];
-    updatedIngredients[index] = {
-      ...updatedIngredients[index],
-      [field]: value,
-    };
-    handleChange('ingredients', updatedIngredients);
+    const updated = [...formData.ingredients];
+    updated[index] = { ...updated[index], [field]: value };
+    handleChange('ingredients', updated);
   };
 
   const addIngredient = () => {
@@ -69,12 +63,11 @@ const RecipeEdit = ({ recipe, onChange, formData }: RecipeEditProps) => {
   };
 
   const removeIngredient = (index: number) => {
-    const updatedIngredients = formData.ingredients.filter((_, i) => i !== index);
-    handleChange('ingredients', updatedIngredients);
+    handleChange('ingredients', formData.ingredients.filter((_, i) => i !== index));
   };
 
   const selectedMenuItem = menuItems.find(
-    item => item.id.toString() === formData.menu_item_id
+    (item) => item.id.toString() === formData.menu_item_id
   );
 
   return (
@@ -86,10 +79,10 @@ const RecipeEdit = ({ recipe, onChange, formData }: RecipeEditProps) => {
             <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
               Menu Item *
             </label>
-            <Select 
-              value={formData.menu_item_id} 
+            <Select
+              value={formData.menu_item_id}
               onValueChange={(value) => handleChange('menu_item_id', value)}
-              disabled={!!recipe} // Disable when editing
+              disabled={!!recipe}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a menu item" />
@@ -116,11 +109,7 @@ const RecipeEdit = ({ recipe, onChange, formData }: RecipeEditProps) => {
               <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                 Menu SKU
               </label>
-              <Input 
-                value={selectedMenuItem.sku} 
-                disabled
-                className="bg-gray-100"
-              />
+              <Input value={selectedMenuItem.sku} disabled className="bg-gray-100" />
             </div>
           )}
         </div>
@@ -129,15 +118,15 @@ const RecipeEdit = ({ recipe, onChange, formData }: RecipeEditProps) => {
       {/* Ingredients Card */}
       <div className="bg-gray-50 rounded-lg p-6 space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Recipe Ingredients
-          </h3>
-          <Button 
-            type="button" 
-            onClick={addIngredient}
-            size="sm"
-            variant="outline"
-          >
+          <div>
+            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Recipe Ingredients
+            </h3>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Enter ingredient name, quantity, and unit manually
+            </p>
+          </div>
+          <Button type="button" onClick={addIngredient} size="sm" variant="outline">
             <Plus className="w-4 h-4 mr-1" />
             Add Ingredient
           </Button>
@@ -149,9 +138,9 @@ const RecipeEdit = ({ recipe, onChange, formData }: RecipeEditProps) => {
               <TableHeader className="bg-[#F9FAFB]">
                 <TableRow>
                   <TableHead className="text-bold text-[#94979F]">Ingredient Name</TableHead>
-                  <TableHead className="text-bold text-[#94979F]">Quantity</TableHead>
-                  <TableHead className="text-bold text-[#94979F]">Unit</TableHead>
-                  <TableHead className="text-bold text-[#94979F] w-20">Action</TableHead>
+                  <TableHead className="text-bold text-[#94979F] w-32">Quantity</TableHead>
+                  <TableHead className="text-bold text-[#94979F] w-28">Unit</TableHead>
+                  <TableHead className="text-bold text-[#94979F] w-16">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -161,40 +150,26 @@ const RecipeEdit = ({ recipe, onChange, formData }: RecipeEditProps) => {
                       <Input
                         value={ingredient.ingredient_name}
                         onChange={(e) => handleIngredientChange(index, 'ingredient_name', e.target.value)}
-                        placeholder="e.g., Flour, Sugar"
+                        placeholder="e.g. Chicken Breast"
                       />
                     </TableCell>
                     <TableCell>
                       <Input
                         type="number"
                         step="0.01"
+                        min="0"
                         value={ingredient.quantity}
                         onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
                         placeholder="0.00"
                       />
                     </TableCell>
                     <TableCell>
-                      <Select
+                      <Input
                         value={ingredient.unit}
-                        onValueChange={(value) => handleIngredientChange(index, 'unit', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Units</SelectLabel>
-                            <SelectItem value="kg">kg (Kilograms)</SelectItem>
-                            <SelectItem value="g">g (Grams)</SelectItem>
-                            <SelectItem value="L">L (Liters)</SelectItem>
-                            <SelectItem value="mL">mL (Milliliters)</SelectItem>
-                            <SelectItem value="pcs">pcs (Pieces)</SelectItem>
-                            <SelectItem value="cups">cups</SelectItem>
-                            <SelectItem value="tbsp">tbsp (Tablespoons)</SelectItem>
-                            <SelectItem value="tsp">tsp (Teaspoons)</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                        onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
+                        placeholder="e.g. kg"
+                        className="uppercase"
+                      />
                     </TableCell>
                     <TableCell>
                       <Button

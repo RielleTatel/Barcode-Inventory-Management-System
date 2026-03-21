@@ -36,13 +36,25 @@ export interface RecipeIngredient {
   unit: string;
 }
 
+// Grouped recipe: one Recipe per menu item with all its ingredients
 export interface Recipe {
   id: number;
   menu_item_id: number;
   menu_item_name: string;
   menu_item_sku: string;
-  ingredients: RecipeIngredient[];
   total_cost?: string;
+  ingredients: RecipeIngredient[];
+}
+
+// Raw row as returned by the backend
+export interface BackendRecipeRow {
+  id: number;
+  menu_item: number;
+  menu_item_name: string;
+  menu_item_sku: string;
+  ingredient_name: string;
+  unit: string;
+  quantity_required: string;
 }
 
 export interface RecipeFormData {

@@ -1,51 +1,41 @@
 from rest_framework import serializers
 from .models import MenuCategory, MenuItem, Recipe
-from apps.inventory.models import InventoryItem
 
 
 class MenuCategorySerializer(serializers.ModelSerializer):
 
     menu_items_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = MenuCategory
         fields = ['id', 'name', 'menu_items_count']
         read_only_fields = ['id']
-    
+
     def get_menu_items_count(self, obj):
         return obj.menu_items.count()
 
+
 class RecipeSerializer(serializers.ModelSerializer):
 
-    inventory_item_name = serializers.CharField(source='inventory_item.name', read_only=True)
-    inventory_item_sku = serializers.CharField(source='inventory_item.sku', read_only=True)
-    inventory_item_uom = serializers.CharField(source='inventory_item.uom', read_only=True)
     menu_item_name = serializers.CharField(source='menu_item.name', read_only=True)
-    
+    menu_item_sku = serializers.CharField(source='menu_item.sku', read_only=True)
+
     class Meta:
         model = Recipe
         fields = [
-            'id', 
-            'menu_item', 
+            'id',
+            'menu_item',
             'menu_item_name',
-            'inventory_item', 
-            'inventory_item_name',
-            'inventory_item_sku',
-            'inventory_item_uom',
-            'quantity_required'
+            'menu_item_sku',
+            'ingredient_name',
+            'unit',
+            'quantity_required',
         ]
         read_only_fields = ['id']
-    
+
     def validate(self, data):
-        if 'inventory_item' in data:
-            try:
-                InventoryItem.objects.get(id=data['inventory_item'].id)
-            except InventoryItem.DoesNotExist:
-                raise serializers.ValidationError("Inventory item does not exist")
-        
         if 'quantity_required' in data and data['quantity_required'] <= 0:
             raise serializers.ValidationError("Quantity required must be greater than 0")
-        
         return data
 
 
@@ -121,13 +111,18 @@ class MenuItemListSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Recipe
-        fields = ['id', 'menu_item', 'inventory_item', 'quantity_required']
+        fields = ['id', 'menu_item', 'ingredient_name', 'unit', 'quantity_required']
         read_only_fields = ['id']
-    
+
     def validate_quantity_required(self, value):
         if value <= 0:
             raise serializers.ValidationError("Quantity required must be greater than 0")
         return value
+
+    def validate_ingredient_name(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Ingredient name is required")
+        return value.strip()

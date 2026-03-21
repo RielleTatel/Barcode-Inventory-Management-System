@@ -32,12 +32,19 @@ class MenuItem(models.Model):
 class Recipe(models.Model):
 
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='recipes')
-    inventory_item = models.ForeignKey(InventoryItem, on_delete=models.PROTECT, related_name='used_in_recipes')  # The raw ingredient link
-    quantity_required = models.DecimalField(max_digits=10, decimal_places=3)  # Amount used per 1 order
-    
+    inventory_item = models.ForeignKey(
+        InventoryItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='used_in_recipes',
+    )
+    ingredient_name = models.CharField(max_length=200, blank=True, default='')
+    unit = models.CharField(max_length=50, blank=True, default='')
+    quantity_required = models.DecimalField(max_digits=10, decimal_places=3)
+
     class Meta:
-        unique_together = ['menu_item', 'inventory_item']
         ordering = ['menu_item__sku']
-    
+
     def __str__(self):
-        return f"{self.menu_item.name} - {self.inventory_item.name}: {self.quantity_required} {self.inventory_item.uom}"
+        return f"{self.menu_item.name} - {self.ingredient_name}: {self.quantity_required} {self.unit}"

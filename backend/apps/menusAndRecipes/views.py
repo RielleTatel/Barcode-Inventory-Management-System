@@ -38,7 +38,7 @@ class MenuCategoryViewSet(viewsets.ModelViewSet):
 
 class MenuItemViewSet(viewsets.ModelViewSet):
 
-    queryset = MenuItem.objects.select_related('menu_category').prefetch_related('recipes__inventory_item')
+    queryset = MenuItem.objects.select_related('menu_category').prefetch_related('recipes')
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['menu_category', 'is_available_cafe']
@@ -73,12 +73,12 @@ class MenuItemViewSet(viewsets.ModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
 
-    queryset = Recipe.objects.select_related('menu_item', 'inventory_item').all()
+    queryset = Recipe.objects.select_related('menu_item').all()
     serializer_class = RecipeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['menu_item', 'inventory_item']
-    search_fields = ['menu_item__name', 'menu_item__sku', 'inventory_item__name', 'inventory_item__sku']
+    filterset_fields = ['menu_item']
+    search_fields = ['menu_item__name', 'menu_item__sku', 'ingredient_name']
     ordering_fields = ['menu_item__sku', 'quantity_required']
     ordering = ['menu_item__sku']
     
@@ -118,8 +118,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['put'])
     def bulk_update(self, request):
         """
-        Update all recipes for a menu item
-        Expected format: {"menu_item": 1, "recipes": [{"inventory_item": 2, "quantity_required": 0.5}, ...]}
+        Update all recipes for a menu item.
+        Expected format: {"menu_item": 1, "recipes": [{"ingredient_name": "Salt", "unit": "g", "quantity_required": 0.5}, ...]}
         """
         menu_item_id = request.data.get('menu_item')
         recipes_data = request.data.get('recipes', [])

@@ -44,7 +44,6 @@ const RecipeModal = ({ isOpen, onClose, mode, recipe }: RecipeModalProps) => {
         })),
       });
     } else if (mode === 'add') {
-      // Reset form for add mode
       setFormData({
         menu_item_id: '',
         ingredients: [],
@@ -61,21 +60,20 @@ const RecipeModal = ({ isOpen, onClose, mode, recipe }: RecipeModalProps) => {
       onClose();
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || "Failed to create recipe");
+      alert(error.response?.data?.error || error.response?.data?.message || "Failed to create recipe");
     },
   });
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
-      updateRecipe(id, data),
+    mutationFn: updateRecipe,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: MENU_QUERY_KEYS.RECIPES });
       alert("Recipe updated successfully");
       onClose();
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || "Failed to update recipe");
+      alert(error.response?.data?.error || error.response?.data?.message || "Failed to update recipe");
     },
   });
 
@@ -88,12 +86,11 @@ const RecipeModal = ({ isOpen, onClose, mode, recipe }: RecipeModalProps) => {
       onClose();
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || "Failed to delete recipe");
+      alert(error.response?.data?.error || error.response?.data?.message || "Failed to delete recipe");
     },
   });
 
   const handleSave = () => {
-    // Validation
     if (!formData.menu_item_id) {
       alert("Please select a menu item");
       return;
@@ -103,18 +100,17 @@ const RecipeModal = ({ isOpen, onClose, mode, recipe }: RecipeModalProps) => {
       return;
     }
 
-    // Validate each ingredient
     for (const ingredient of formData.ingredients) {
       if (!ingredient.ingredient_name.trim()) {
-        alert("All ingredients must have a name");
+        alert("Please enter an ingredient name for every row");
         return;
       }
       if (!ingredient.quantity || Number(ingredient.quantity) <= 0) {
-        alert("All ingredients must have a valid quantity");
+        alert("All ingredients must have a valid quantity greater than 0");
         return;
       }
-      if (!ingredient.unit) {
-        alert("All ingredients must have a unit");
+      if (!ingredient.unit.trim()) {
+        alert("Please enter a unit for every ingredient");
         return;
       }
     }
@@ -123,23 +119,22 @@ const RecipeModal = ({ isOpen, onClose, mode, recipe }: RecipeModalProps) => {
       menu_item_id: Number(formData.menu_item_id),
       ingredients: formData.ingredients.map(ing => ({
         ingredient_name: ing.ingredient_name.trim(),
+        unit: ing.unit.trim(),
         quantity: ing.quantity,
-        unit: ing.unit,
       })),
     };
 
     if (mode === 'add') {
       createMutation.mutate(payload);
     } else if (mode === 'edit' && recipe) {
-      updateMutation.mutate({ id: recipe.id, data: payload });
+      updateMutation.mutate(payload);
     }
   };
 
   const handleDelete = () => {
     if (!recipe) return;
-    
     if (window.confirm(`Are you sure you want to delete the recipe for "${recipe.menu_item_name}"? This action cannot be undone.`)) {
-      deleteMutation.mutate(recipe.id);
+      deleteMutation.mutate(recipe.menu_item_id);
     }
   };
 

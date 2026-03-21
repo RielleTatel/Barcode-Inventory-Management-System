@@ -1,7 +1,5 @@
 import { KpiCards } from '@/components/dashboard/KpiCards';
-import type { InventoryKpiData } from '@/components/dashboard/KpiCards';
-
-
+import type { InventoryKpiData } from '@/components/dashboard';
 
 const DashboardPage1 = () => {
   const branchData: InventoryKpiData = {
