@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { SupplyTabs } from "@/components/ui/tabs";
 import { useTabWithUrl } from "@/hooks/useTabWithUrl";
 import ReceiveDelivery from "@/components/supply/ReceiveDelivery";
@@ -11,7 +10,11 @@ const Supply = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "receive-delivery":
-        return <ReceiveDelivery />;
+        return (
+          <ReceiveDelivery
+            onDeliverySuccess={() => handleTabChange("purchase-history")}
+          />
+        );
       case "supplier-directory":
         return <SupplierDirectory />;
       case "purchase-history":
@@ -22,14 +25,12 @@ const Supply = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full gap-y-2.5 ">
+    <div className="flex flex-col h-full w-full gap-y-2.5">
 
-    <div className="rounded-xl p-2 flex flex-col gap-y-4">
-      <div className="flex flex-col">
-        <p className="text-[32px] font-bold"> Supply Management </p> 
-        <p className="text-md"> Manage Your Supplies </p> 
-      </div> 
-    </div>  
+      <div className="rounded-xl p-2 flex flex-col gap-y-1">
+        <p className="text-[32px] font-bold">Supply Management</p>
+        <p className="text-sm text-gray-500">Manage suppliers, receive deliveries, and review purchase history.</p>
+      </div>
 
       <SupplyTabs
         activeTab={activeTab}
