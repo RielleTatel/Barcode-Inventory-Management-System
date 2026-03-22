@@ -23,22 +23,20 @@ export interface inventoryModalProps {
   inventoryData?: InventoryItem;
 }
 
+const EMPTY_FORM: InventoryEditFormData = {
+  sku: '',
+  name: '',
+  category: null,
+  category_name: '',
+  uom: '',
+  linked_menu_item: null,
+  branch_stocks_write: [],
+};
+
 const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryModalProps) => {
   const queryClient = useQueryClient();
+  const [formData, setFormData] = useState<InventoryEditFormData>(EMPTY_FORM);
 
-  const [formData, setFormData] = useState<InventoryEditFormData>({
-    sku: '',
-    name: '',
-    category: null,
-    category_name: '',
-    uom: '',
-    current_stock: '0',
-    min_stock_level: '0',
-    branch_ids: [],
-    linked_menu_item: null,
-  });
-
-  // Populate form when editing
   useEffect(() => {
     if (mode === 'edit' && inventoryData) {
       setFormData({
@@ -47,27 +45,18 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
         category: inventoryData.category,
         category_name: inventoryData.category_name,
         uom: inventoryData.uom,
-        current_stock: inventoryData.current_stock,
-        min_stock_level: inventoryData.min_stock_level,
-        branch_ids: (inventoryData.branches ?? []).map((b) => b.id),
-        linked_menu_item: inventoryData.linked_menu_item_details?.id || null,
+        linked_menu_item: inventoryData.linked_menu_item_details?.id ?? null,
+        branch_stocks_write: (inventoryData.branch_stocks ?? []).map(bs => ({
+          branch_id: bs.branch,
+          quantity: bs.quantity,
+          threshold: bs.threshold,
+        })),
       });
     } else if (mode === 'add') {
-      setFormData({
-        sku: '',
-        name: '',
-        category: null,
-        category_name: '',
-        uom: '',
-        current_stock: '0',
-        min_stock_level: '0',
-        branch_ids: [],
-        linked_menu_item: null,
-      });
+      setFormData(EMPTY_FORM);
     }
   }, [mode, inventoryData, isOpen]);
 
-  // Create mutation
   const createMutation = useMutation({
     mutationFn: createInventoryItem,
     onSuccess: () => {
@@ -76,14 +65,12 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
       onClose();
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || error.response?.data?.sku?.[0] || "Failed to create inventory item");
+      alert(error.response?.data?.sku?.[0] || error.response?.data?.message || "Failed to create inventory item");
     },
   });
 
-  // Update mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InventoryEditFormData> }) =>
-      updateInventoryItem(id, data as any),
+    mutationFn: ({ id, data }: { id: number; data: any }) => updateInventoryItem(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: INVENTORY_QUERY_KEYS.INVENTORY_ITEMS });
       alert("Inventory item updated successfully");
@@ -94,7 +81,6 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
     },
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: deleteInventoryItem,
     onSuccess: () => {
@@ -103,36 +89,18 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
       onClose();
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || "Failed to delete inventory item");
+      const msg = error.response?.data?.error || error.response?.data?.detail || "Failed to delete inventory item";
+      alert(msg);
     },
   });
 
   const handleSave = () => {
-    // Validation
-    if (!formData.category) {
-      alert("Please select a category");
-      return;
-    }
-    if (!formData.sku.trim()) {
-      alert("SKU is required");
-      return;
-    }
-    if (!formData.name.trim()) {
-      alert("Item name is required");
-      return;
-    }
-    if (!formData.uom) {
-      alert("Please select a unit of measure");
-      return;
-    }
-    if (!formData.min_stock_level || Number(formData.min_stock_level) < 0) {
-      alert("Valid minimum stock level is required");
-      return;
-    }
-    // If Prepared Items, linked menu item is required
+    if (!formData.category) { alert("Please select a category"); return; }
+    if (!formData.sku.trim()) { alert("SKU is required"); return; }
+    if (!formData.name.trim()) { alert("Item name is required"); return; }
+    if (!formData.uom) { alert("Please select a unit of measure"); return; }
     if (formData.category_name === 'Prepared Items' && !formData.linked_menu_item) {
-      alert("Please select a menu item to link");
-      return;
+      alert("Please select a menu item to link"); return;
     }
 
     const payload = {
@@ -140,22 +108,23 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
       name: formData.name.trim(),
       category: formData.category,
       uom: formData.uom,
-      current_stock: formData.current_stock,
-      min_stock_level: formData.min_stock_level,
-      branch_ids: formData.branch_ids ?? [],
       linked_menu_item: formData.linked_menu_item,
+      branch_stocks_write: (formData.branch_stocks_write ?? []).map(bs => ({
+        branch_id: bs.branch_id,
+        quantity: bs.quantity || '0',
+        threshold: bs.threshold || '0',
+      })),
     };
 
     if (mode === 'add') {
       createMutation.mutate(payload as any);
     } else if (mode === 'edit' && inventoryData) {
-      updateMutation.mutate({ id: inventoryData.id, data: payload as any });
+      updateMutation.mutate({ id: inventoryData.id, data: payload });
     }
   };
 
   const handleDelete = () => {
     if (!inventoryData) return;
-
     if (window.confirm(`Are you sure you want to delete "${inventoryData.name}"? This action cannot be undone.`)) {
       deleteMutation.mutate(inventoryData.id);
     }
@@ -163,12 +132,9 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
 
   const getTitle = () => {
     switch (mode) {
-      case 'view':
-        return '📦 View Inventory Item';
-      case 'edit':
-        return '✏️ Edit Inventory Item';
-      case 'add':
-        return '📦 Add New Inventory Item';
+      case 'view': return '📦 View Inventory Item';
+      case 'edit': return '✏️ Edit Inventory Item';
+      case 'add': return '📦 Add New Inventory Item';
     }
   };
 
@@ -176,9 +142,7 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
-            {getTitle()}
-          </DialogTitle>
+          <DialogTitle className="text-2xl">{getTitle()}</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">

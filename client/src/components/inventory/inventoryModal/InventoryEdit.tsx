@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
-import { ChevronDown, X, Package, UtensilsCrossed, GitBranch } from "lucide-react";
+import { ChevronDown, X, Package, UtensilsCrossed, Building2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { fetchInventoryCategories, fetchBranches } from "../api";
 import { fetchAllMenuItems } from "@/components/menus&Recipes/api";
 import { INVENTORY_QUERY_KEYS, UOM_OPTIONS, type InventoryItem } from "..";
 import { MENU_QUERY_KEYS } from "@/components/menus&Recipes";
+
+export interface BranchStockEntry {
+  branch_id: number;
+  quantity: string;
+  threshold: string;
+}
 
 export interface InventoryEditFormData {
   sku: string;
@@ -15,10 +20,8 @@ export interface InventoryEditFormData {
   category: number | null;
   category_name: string;
   uom: string;
-  current_stock: string;
-  min_stock_level: string;
-  branch_ids: number[];
   linked_menu_item: number | null;
+  branch_stocks_write: BranchStockEntry[];
 }
 
 interface InventoryEditProps {
@@ -43,132 +46,115 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
     queryFn: fetchBranches,
   });
 
-  // Category dropdown state
+  // Dropdown state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Menu item dropdown state
   const [showMenuDropdown, setShowMenuDropdown] = useState(false);
   const [menuSearchInput, setMenuSearchInput] = useState('');
   const menuDropdownRef = useRef<HTMLDivElement>(null);
 
-  // UOM dropdown state
   const [showUomDropdown, setShowUomDropdown] = useState(false);
   const uomDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filter menu items based on search
   const filteredMenuItems = menuItems.filter(item =>
     item.name.toLowerCase().includes(menuSearchInput.toLowerCase()) ||
     item.sku.toLowerCase().includes(menuSearchInput.toLowerCase())
   );
 
-  // Check if selected category is "Prepared Items"
   const isPreparedItems = formData.category_name === 'Prepared Items';
 
-  // Click outside handlers
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node))
         setShowCategoryDropdown(false);
-      }
-      if (menuDropdownRef.current && !menuDropdownRef.current.contains(event.target as Node)) {
+      if (menuDropdownRef.current && !menuDropdownRef.current.contains(event.target as Node))
         setShowMenuDropdown(false);
-      }
-      if (uomDropdownRef.current && !uomDropdownRef.current.contains(event.target as Node)) {
+      if (uomDropdownRef.current && !uomDropdownRef.current.contains(event.target as Node))
         setShowUomDropdown(false);
-      }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Update menu search input when a menu item is selected
   useEffect(() => {
     if (formData.linked_menu_item) {
-      const selectedItem = menuItems.find(item => item.id === formData.linked_menu_item);
-      if (selectedItem) {
-        setMenuSearchInput(selectedItem.name);
-      }
+      const selected = menuItems.find(item => item.id === formData.linked_menu_item);
+      if (selected) setMenuSearchInput(selected.name);
     }
   }, [formData.linked_menu_item, menuItems]);
 
-  const handleChange = (field: keyof InventoryEditFormData, value: string | number | boolean | null) => {
-    onChange({
-      ...formData,
-      [field]: value,
-    });
-  };
-
-  const toggleBranch = (branchId: number) => {
-    const current = formData.branch_ids ?? [];
-    const updated = current.includes(branchId)
-      ? current.filter((id) => id !== branchId)
-      : [...current, branchId];
-    onChange({ ...formData, branch_ids: updated });
+  const handleChange = (field: keyof InventoryEditFormData, value: string | number | null) => {
+    onChange({ ...formData, [field]: value });
   };
 
   const handleCategorySelect = (categoryId: number, categoryName: string) => {
-    console.log('Category selected:', { categoryId, categoryName });
     onChange({
       ...formData,
       category: categoryId,
       category_name: categoryName,
-      // Reset linked menu item if switching away from Prepared Items
       linked_menu_item: categoryName !== 'Prepared Items' ? null : formData.linked_menu_item,
     });
     setShowCategoryDropdown(false);
-
-    // Reset menu search input if switching away from Prepared Items
-    if (categoryName !== 'Prepared Items') {
-      setMenuSearchInput('');
-    }
+    if (categoryName !== 'Prepared Items') setMenuSearchInput('');
   };
 
   const handleMenuItemSelect = (menuItemId: number, menuItemName: string) => {
-    onChange({
-      ...formData,
-      linked_menu_item: menuItemId,
-      name: menuItemName, // Auto-fill item name from menu item
-    });
+    onChange({ ...formData, linked_menu_item: menuItemId, name: menuItemName });
     setMenuSearchInput(menuItemName);
     setShowMenuDropdown(false);
   };
 
   const handleUomSelect = (uomValue: string) => {
-    onChange({
-      ...formData,
-      uom: uomValue,
-    });
+    onChange({ ...formData, uom: uomValue });
     setShowUomDropdown(false);
   };
 
   const clearCategory = () => {
-    onChange({
-      ...formData,
-      category: null,
-      category_name: '',
-      linked_menu_item: null,
-      name: '',
-    });
+    onChange({ ...formData, category: null, category_name: '', linked_menu_item: null, name: '' });
     setMenuSearchInput('');
   };
 
   const clearMenuItem = () => {
-    onChange({
-      ...formData,
-      linked_menu_item: null,
-      name: '',
-    });
+    onChange({ ...formData, linked_menu_item: null, name: '' });
     setMenuSearchInput('');
   };
 
-  // Get the UOM label for display
+  // ── Branch stock helpers ──────────────────────────────────────────────────
+
+  const branchStocks = formData.branch_stocks_write ?? [];
+
+  const addBranchStock = (branchId: number) => {
+    if (branchStocks.some(bs => bs.branch_id === branchId)) return;
+    onChange({
+      ...formData,
+      branch_stocks_write: [...branchStocks, { branch_id: branchId, quantity: '0', threshold: '0' }],
+    });
+  };
+
+  const removeBranchStock = (branchId: number) => {
+    onChange({
+      ...formData,
+      branch_stocks_write: branchStocks.filter(bs => bs.branch_id !== branchId),
+    });
+  };
+
+  const updateBranchStock = (branchId: number, field: 'quantity' | 'threshold', value: string) => {
+    onChange({
+      ...formData,
+      branch_stocks_write: branchStocks.map(bs =>
+        bs.branch_id === branchId ? { ...bs, [field]: value } : bs
+      ),
+    });
+  };
+
+  const availableBranches = branches.filter(b => !branchStocks.some(bs => bs.branch_id === b.id));
+
   const selectedUomLabel = UOM_OPTIONS.find(opt => opt.value === formData.uom)?.label || formData.uom;
 
   return (
     <div className="space-y-6">
-      {/* Row 1: Category Selection */}
+      {/* Category Selection */}
       <div className="space-y-2 relative" ref={categoryDropdownRef}>
         <label className="text-sm font-semibold text-gray-700">
           Category <span className="text-red-500">*</span>
@@ -192,39 +178,18 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
             )}
             <div className="flex items-center gap-1">
               {formData.category_name && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    clearCategory();
-                  }}
-                >
+                <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); clearCategory(); }}>
                   <X className="h-4 w-4" />
                 </Button>
               )}
               <ChevronDown className="h-4 w-4 text-gray-400" />
             </div>
           </div>
-
-          {/* Category Dropdown */}
           {showCategoryDropdown && !categoriesLoading && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-              {/* Raw Materials Option */}
               <div
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
-                  formData.category_name === 'Raw Materials'
-                    ? 'bg-amber-50 border-l-4 border-amber-500'
-                    : 'hover:bg-gray-50'
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Find or use default category ID for Raw Materials
-                  const rawMaterialsCat = categories.find(c => c.name === 'Raw Materials');
-                  handleCategorySelect(rawMaterialsCat?.id || 1, 'Raw Materials');
-                }}
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${formData.category_name === 'Raw Materials' ? 'bg-amber-50 border-l-4 border-amber-500' : 'hover:bg-gray-50'}`}
+                onClick={(e) => { e.stopPropagation(); const cat = categories.find(c => c.name === 'Raw Materials'); handleCategorySelect(cat?.id || 1, 'Raw Materials'); }}
               >
                 <Package className="w-5 h-5 text-amber-600" />
                 <div>
@@ -232,19 +197,9 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
                   <p className="text-xs text-gray-500">Ingredients and supplies for production</p>
                 </div>
               </div>
-
-              {/* Prepared Items Option */}
               <div
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
-                  formData.category_name === 'Prepared Items'
-                    ? 'bg-emerald-50 border-l-4 border-emerald-500'
-                    : 'hover:bg-gray-50'
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const preparedItemsCat = categories.find(c => c.name === 'Prepared Items');
-                  handleCategorySelect(preparedItemsCat?.id || 2, 'Prepared Items');
-                }}
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${formData.category_name === 'Prepared Items' ? 'bg-emerald-50 border-l-4 border-emerald-500' : 'hover:bg-gray-50'}`}
+                onClick={(e) => { e.stopPropagation(); const cat = categories.find(c => c.name === 'Prepared Items'); handleCategorySelect(cat?.id || 2, 'Prepared Items'); }}
               >
                 <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
                 <div>
@@ -257,77 +212,49 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
         </div>
       </div>
 
-      {/* Conditional: Menu Item Selection (only for Prepared Items) */}
+      {/* Prepared Items — Link to Menu Item */}
       {isPreparedItems && (
         <div className="space-y-2 relative" ref={menuDropdownRef}>
           <label className="text-sm font-semibold text-gray-700">
             Link to Menu Item <span className="text-red-500">*</span>
           </label>
-          <p className="text-xs text-gray-500 -mt-1">
-            Select the menu dish to link this inventory entry to
-          </p>
+          <p className="text-xs text-gray-500 -mt-1">Select the menu dish to link this inventory entry to</p>
           <div className="relative">
             <Input
               placeholder="Search menu items..."
               value={menuSearchInput}
-              onChange={(e) => {
-                setMenuSearchInput(e.target.value);
-                setShowMenuDropdown(true);
-              }}
+              onChange={(e) => { setMenuSearchInput(e.target.value); setShowMenuDropdown(true); }}
               onFocus={() => setShowMenuDropdown(true)}
               className="h-12 pr-16"
               disabled={menuItemsLoading}
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {menuSearchInput && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={clearMenuItem}
-                >
+                <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={clearMenuItem}>
                   <X className="h-4 w-4" />
                 </Button>
               )}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-                onClick={() => setShowMenuDropdown(!showMenuDropdown)}
-              >
+              <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setShowMenuDropdown(!showMenuDropdown)}>
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </div>
           </div>
-
-          {/* Menu Items Dropdown */}
           {showMenuDropdown && !menuItemsLoading && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-              {filteredMenuItems.length > 0 ? (
-                filteredMenuItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`px-4 py-3 cursor-pointer transition-colors ${
-                      formData.linked_menu_item === item.id
-                        ? 'bg-emerald-50 border-l-4 border-emerald-500'
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => handleMenuItemSelect(item.id, item.name)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-gray-900">{item.name}</p>
-                        <p className="text-xs text-gray-500">SKU: {item.sku}</p>
-                      </div>
-                      <span className="text-sm font-semibold text-emerald-600">
-                        ₱{parseFloat(item.price).toFixed(2)}
-                      </span>
+              {filteredMenuItems.length > 0 ? filteredMenuItems.map(item => (
+                <div key={item.id}
+                  className={`px-4 py-3 cursor-pointer transition-colors ${formData.linked_menu_item === item.id ? 'bg-emerald-50 border-l-4 border-emerald-500' : 'hover:bg-gray-50'}`}
+                  onClick={() => handleMenuItemSelect(item.id, item.name)}
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-gray-900">{item.name}</p>
+                      <p className="text-xs text-gray-500">SKU: {item.sku}</p>
                     </div>
+                    <span className="text-sm font-semibold text-emerald-600">₱{parseFloat(item.price).toFixed(2)}</span>
                   </div>
-                ))
-              ) : (
+                </div>
+              )) : (
                 <div className="px-4 py-3 text-sm text-gray-500">
                   {menuSearchInput ? 'No matching menu items found' : 'No menu items available'}
                 </div>
@@ -337,45 +264,32 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
         </div>
       )}
 
-      {/* Row 2: SKU and Item Name */}
+      {/* SKU and Item Name */}
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">
-            SKU <span className="text-red-500">*</span>
-          </label>
+          <label className="text-sm font-semibold text-gray-700">SKU <span className="text-red-500">*</span></label>
           <Input
             placeholder={isPreparedItems ? "e.g., PI-0001" : "e.g., RM-0001"}
             value={formData.sku}
             onChange={(e) => handleChange('sku', e.target.value.toUpperCase())}
             className="h-12 font-mono"
           />
-          <p className="text-xs text-gray-500">
-            {isPreparedItems ? 'Use PI- prefix for prepared items' : 'Use RM- prefix for raw materials'}
-          </p>
+          <p className="text-xs text-gray-500">{isPreparedItems ? 'Use PI- prefix' : 'Use RM- prefix'}</p>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">
-            Item Name <span className="text-red-500">*</span>
-          </label>
+          <label className="text-sm font-semibold text-gray-700">Item Name <span className="text-red-500">*</span></label>
           <Input
             placeholder={isPreparedItems ? "Auto-filled from menu item" : "e.g., Chicken Breast"}
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
             className="h-12"
           />
-          {isPreparedItems && (
-            <p className="text-xs text-gray-500">
-              Auto-filled from linked menu item, but can be edited
-            </p>
-          )}
         </div>
       </div>
 
-      {/* Row 3: Unit of Measure */}
+      {/* Unit of Measure */}
       <div className="space-y-2 relative" ref={uomDropdownRef}>
-        <label className="text-sm font-semibold text-gray-700">
-          Unit of Measure <span className="text-red-500">*</span>
-        </label>
+        <label className="text-sm font-semibold text-gray-700">Unit of Measure <span className="text-red-500">*</span></label>
         <div
           className="flex items-center h-12 px-4 border border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
           onClick={() => setShowUomDropdown(!showUomDropdown)}
@@ -385,18 +299,11 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
           </span>
           <ChevronDown className="h-4 w-4 text-gray-400" />
         </div>
-
-        {/* UOM Dropdown */}
         {showUomDropdown && (
           <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-            {UOM_OPTIONS.map((option) => (
-              <div
-                key={option.value}
-                className={`px-4 py-2 cursor-pointer transition-colors ${
-                  formData.uom === option.value
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'hover:bg-gray-50'
-                }`}
+            {UOM_OPTIONS.map(option => (
+              <div key={option.value}
+                className={`px-4 py-2 cursor-pointer transition-colors ${formData.uom === option.value ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'}`}
                 onClick={() => handleUomSelect(option.value)}
               >
                 {option.label}
@@ -406,82 +313,97 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
         )}
       </div>
 
-      {/* Row 4: Current Stock and Minimum Stock Level */}
-      <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">
-            Current Stock <span className="text-red-500">*</span>
-          </label>
-          <Input
-            type="number"
-            placeholder="e.g., 100"
-            value={formData.current_stock}
-            onChange={(e) => handleChange('current_stock', e.target.value)}
-            className="h-12"
-            step="0.01"
-            min="0"
-          />
-          <p className="text-xs text-gray-500">
-            How many units you currently have on hand
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">
-            Minimum Stock Level <span className="text-red-500">*</span>
-          </label>
-          <Input
-            type="number"
-            placeholder="e.g., 10"
-            value={formData.min_stock_level}
-            onChange={(e) => handleChange('min_stock_level', e.target.value)}
-            className="h-12"
-            step="0.01"
-            min="0"
-          />
-          <p className="text-xs text-gray-500">
-            Alert will show when stock falls below this level
-          </p>
-        </div>
-      </div>
-
-      {/* Row 5: Branch Availability */}
+      {/* Branch Stock Table */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <GitBranch className="w-4 h-4 text-blue-600" />
-          <label className="text-sm font-semibold text-gray-700">Branch Availability</label>
-        </div>
-        <p className="text-xs text-gray-500 -mt-1">
-          Select which branches this item is available at. Leave unchecked if available everywhere.
-        </p>
-        {branches.length === 0 ? (
-          <p className="text-sm text-gray-400 italic">No branches registered yet.</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {branches.map((branch) => {
-              const checked = (formData.branch_ids ?? []).includes(branch.id);
-              return (
-                <div
-                  key={branch.id}
-                  className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                    checked ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                  onClick={() => toggleBranch(branch.id)}
-                >
-                  <Checkbox
-                    checked={checked}
-                    onCheckedChange={() => toggleBranch(branch.id)}
-                    className="mt-0.5"
-                  />
-                  <div>
-                    <p className="font-medium text-sm text-gray-900">{branch.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {branch.branch_type === 'kitchen' ? 'Full-Service Restaurant' : 'Resto Café'}
-                    </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-blue-600" />
+            <label className="text-sm font-semibold text-gray-700">Branch Stock Levels</label>
+          </div>
+          {availableBranches.length > 0 && (
+            <div className="relative group">
+              <Button type="button" variant="outline" size="sm" className="gap-1 text-xs">
+                <Plus className="w-3 h-3" /> Add Branch
+              </Button>
+              <div className="absolute right-0 top-8 z-50 hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg min-w-[180px]">
+                {availableBranches.map(b => (
+                  <div key={b.id}
+                    className="px-3 py-2 cursor-pointer hover:bg-blue-50 text-sm transition-colors"
+                    onMouseDown={(e) => { e.preventDefault(); addBranchStock(b.id); }}
+                  >
+                    {b.name}
                   </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <p className="text-xs text-gray-500">
+          Set the stock quantity and low-stock threshold for each branch where this item is available.
+        </p>
+
+        {branchStocks.length === 0 ? (
+          <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <Building2 className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-400">No branches assigned yet.</p>
+            <p className="text-xs text-gray-400 mt-1">Use the "Add Branch" button to assign stock to a branch.</p>
+          </div>
+        ) : (
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                <tr>
+                  <th className="px-4 py-2 text-left">Branch</th>
+                  <th className="px-4 py-2 text-right">Quantity</th>
+                  <th className="px-4 py-2 text-right">Low-Stock Alert</th>
+                  <th className="px-2 py-2"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {branchStocks.map(bs => {
+                  const branch = branches.find(b => b.id === bs.branch_id);
+                  if (!branch) return null;
+                  return (
+                    <tr key={bs.branch_id} className="bg-white hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div>
+                          <p className="font-medium text-gray-900">{branch.name}</p>
+                          <p className="text-xs text-gray-400 capitalize">{branch.branch_type.replace('_', ' ')}</p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={bs.quantity}
+                          onChange={(e) => updateBranchStock(bs.branch_id, 'quantity', e.target.value)}
+                          className="h-9 text-right w-28 ml-auto"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex items-center justify-end gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={bs.threshold}
+                            onChange={(e) => updateBranchStock(bs.branch_id, 'threshold', e.target.value)}
+                            className="h-9 text-right w-28"
+                          />
+                          <span className="text-xs text-gray-400 w-6">{formData.uom}</span>
+                        </div>
+                      </td>
+                      <td className="px-2 py-2">
+                        <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => removeBranchStock(bs.branch_id)}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -489,11 +411,10 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
       {/* Info Note */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
-          <span className="font-semibold">Note:</span> All fields marked with{" "}
-          <span className="text-red-500">*</span> are required.
+          <span className="font-semibold">Tip:</span> The "Low-Stock Alert" threshold is the minimum quantity for that branch before the system flags it as low. Each branch can have a different threshold.
           {isPreparedItems && (
             <span className="block mt-1">
-              For <strong>Prepared Items</strong>, the inventory entry will be linked to the selected menu item for tracking.
+              For <strong>Prepared Items</strong>, this inventory entry will be linked to the selected menu item for consumption tracking.
             </span>
           )}
         </p>
@@ -503,4 +424,3 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
 };
 
 export default InventoryEdit;
-

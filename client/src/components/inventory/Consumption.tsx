@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { fetchAllMenuItems } from "@/components/menus&Recipes/api";
 import { MENU_QUERY_KEYS } from "@/components/menus&Recipes";
-import { fetchAllInventoryItems, submitConsumption } from "./api";
+import { fetchAllInventoryItems, fetchBranches, submitConsumption } from "./api";
 import { INVENTORY_QUERY_KEYS } from ".";
 
 type SoldRow = {
@@ -52,6 +52,11 @@ const Consumption = () => {
     queryFn: fetchAllInventoryItems,
   });
 
+  const { data: branches = [] } = useQuery({
+    queryKey: INVENTORY_QUERY_KEYS.BRANCHES,
+    queryFn: fetchBranches,
+  });
+
   // Only menu items that have a registered Prepared Items inventory entry
   const linkedMenuItemIds = new Set(
     inventoryItems
@@ -60,7 +65,7 @@ const Consumption = () => {
   );
   const preparedMenuItems = menuItems.filter((m) => linkedMenuItemIds.has(m.id));
 
-  const [branch, setBranch] = useState("");
+  const [branchId, setBranchId] = useState<string>("");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
 
   const [soldRows, setSoldRows] = useState<SoldRow[]>([
@@ -106,7 +111,7 @@ const Consumption = () => {
 
     submitMutation.mutate({
       date,
-      branch_name: branch,
+      branch_id: branchId ? Number(branchId) : null,
       menu_items_sold: validRows.map((r) => ({
         menu_item_id: Number(r.menuItemId),
         units_sold: Number(r.unitsSold),
@@ -168,19 +173,21 @@ const Consumption = () => {
         {/* Branch and Date Selection */}
         <div className="gap-4 bg-[#F9F9F9] flex flex-row py-4 px-6 gap-x-28 justify-start items-center rounded-[12px]">
           <div className="flex flex-col gap-y-2 w-64">
-            <label className="font-semibold">Branch Name</label>
-            <Select value={branch} onValueChange={setBranch}>
+            <label className="font-semibold">Branch</label>
+            <Select value={branchId} onValueChange={setBranchId}>
               <SelectTrigger>
                 <SelectValue placeholder="Select branch" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="Restaurant Branch 1">Restaurant Branch 1</SelectItem>
-                  <SelectItem value="Restaurant Branch 2">Restaurant Branch 2</SelectItem>
-                  <SelectItem value="Restaurant Branch 3">Restaurant Branch 3</SelectItem>
+                  <SelectLabel>Branches</SelectLabel>
+                  {branches.map((b) => (
+                    <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
+            <p className="text-xs text-gray-400">Stock is deducted from the selected branch's inventory.</p>
           </div>
 
           <div className="flex flex-col gap-y-2 w-64">

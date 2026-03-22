@@ -89,11 +89,11 @@ const Inventories = ({ onView, onEdit }: InventoriesProps) => {
 
     const matchesStock =
       stockFilter === "all" ||
-      item.status === stockFilter;
+      item.stock_status === stockFilter;
 
     const matchesBranch =
       branchFilter === "all" ||
-      (item.branches ?? []).some((b) => b.id.toString() === branchFilter);
+      (item.branch_stocks ?? []).some((bs) => bs.branch.toString() === branchFilter);
 
     return matchesSearch && matchesCategory && matchesStock && matchesBranch;
   });
@@ -208,11 +208,11 @@ const Inventories = ({ onView, onEdit }: InventoriesProps) => {
                     <TableCell className="font-mono text-sm">{item.sku}</TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell className="text-gray-600">{item.category_name}</TableCell>
-                    <TableCell>{parseFloat(item.current_stock ?? '0')}</TableCell>
+                    <TableCell>{parseFloat(item.total_stock ?? '0')}</TableCell>
                     <TableCell className="text-gray-500 uppercase text-xs">{item.uom}</TableCell>
                     <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[item.status ?? ""] ?? "text-gray-600 bg-gray-100"}`}>
-                        {item.status ?? "Unknown"}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[item.stock_status ?? ""] ?? "text-gray-600 bg-gray-100"}`}>
+                        {item.stock_status ?? "Unknown"}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">

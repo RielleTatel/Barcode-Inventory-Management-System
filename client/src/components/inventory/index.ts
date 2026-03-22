@@ -6,6 +6,18 @@ export interface Branch {
   address?: string;
 }
 
+// Per-branch stock record
+export interface BranchStock {
+  id: number;
+  branch: number;
+  branch_name: string;
+  branch_type: string;
+  quantity: string;
+  threshold: string;
+  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  last_updated: string;
+}
+
 // Inventory Category types
 export interface InventoryCategory {
   id: number;
@@ -21,7 +33,7 @@ export const INVENTORY_CATEGORIES = [
 
 export type InventoryCategoryType = typeof INVENTORY_CATEGORIES[number]['value'];
 
-// Inventory Item from API
+// Inventory Item from API — master product record
 export interface InventoryItem {
   id: number;
   sku: string;
@@ -29,10 +41,10 @@ export interface InventoryItem {
   category: number;
   category_name: string;
   uom: string;
-  current_stock: string;
-  min_stock_level: string;
-  status?: string;
-  branches: { id: number; name: string; branch_type: string }[];
+  total_stock: string;
+  stock_status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  branch_stocks: BranchStock[];
+  linked_menu_item: number | null;
   linked_menu_item_details?: {
     id: number;
     sku: string;
@@ -49,9 +61,8 @@ export interface InventoryItemFormData {
   name: string;
   category: number;
   uom: string;
-  current_stock: string;
-  min_stock_level: string;
   linked_menu_item?: number | null;
+  branch_stocks_write: { branch_id: number; quantity: string; threshold: string }[];
 }
 
 // Stock data for display (legacy support)
