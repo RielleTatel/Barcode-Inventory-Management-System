@@ -7,13 +7,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models, transaction
 from django.utils import timezone
 
-from .models import Category, InventoryItem, StockLevel, StockAdjustment, ConsumptionEntry, BOMEntry
+from .models import Category, InventoryItem, StockLevel, StockAdjustment, StockTransfer, ConsumptionEntry, BOMEntry
 from .serializers import (
     CategorySerializer,
     InventoryItemSerializer,
     InventoryItemListSerializer,
     StockLevelSerializer,
     StockAdjustmentSerializer,
+    StockTransferSerializer,
     ConsumptionEntrySerializer,
     ConsumptionEntryListSerializer,
     BOMEntrySerializer,
@@ -45,7 +46,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class InventoryItemViewSet(viewsets.ModelViewSet):
     """ViewSet for inventory items CRUD operations"""
     
-    queryset = InventoryItem.objects.select_related('category').prefetch_related('stock_levels__branch')
+    queryset = InventoryItem.objects.select_related('category').prefetch_related('stock_levels__branch', 'branches')
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category']
@@ -304,6 +305,117 @@ class ConsumptionEntryViewSet(viewsets.ReadOnlyModelViewSet):
                         'unmatched': [
                             r.ingredient_name for r in bom_rows if not r.inventory_matched
                         ],
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+        except Exception as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StockTransferViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    GET  /inventory/transfers/         — list all transfer logs
+    GET  /inventory/transfers/{id}/    — retrieve one log
+    POST /inventory/transfers/submit/  — create a transfer
+    """
+    queryset = StockTransfer.objects.select_related(
+        'item', 'from_branch', 'to_branch'
+    ).all()
+    serializer_class = StockTransferSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['item', 'from_branch', 'to_branch']
+    ordering_fields = ['transferred_at', 'date']
+    ordering = ['-transferred_at']
+
+    @action(detail=False, methods=['post'])
+    def submit(self, request):
+        """
+        Transfer stock between branches.
+
+        Payload:
+        {
+          "item_id": 5,
+          "from_branch_id": 1,
+          "to_branch_id": 2,
+          "quantity": 10,
+          "date": "2026-03-21",
+          "notes": "optional"
+        }
+
+        Effects:
+        - Ensures destination branch is added to item.branches
+        - Removes source branch from item.branches if quantity == current_stock
+          (full transfer). For partial transfers the source branch stays.
+        - Logs a StockTransfer record.
+        """
+        item_id = request.data.get('item_id')
+        from_branch_id = request.data.get('from_branch_id')
+        to_branch_id = request.data.get('to_branch_id')
+        quantity_raw = request.data.get('quantity')
+        date_str = request.data.get('date')
+        notes = request.data.get('notes', '')
+
+        # ── validation ──────────────────────────────────────────────────
+        if not all([item_id, from_branch_id, to_branch_id, quantity_raw, date_str]):
+            return Response(
+                {'error': 'item_id, from_branch_id, to_branch_id, quantity and date are required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if from_branch_id == to_branch_id:
+            return Response(
+                {'error': 'Source and destination branches must be different.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            quantity = Decimal(str(quantity_raw))
+        except Exception:
+            return Response({'error': 'Invalid quantity.'}, status=status.HTTP_400_BAD_REQUEST)
+        if quantity <= 0:
+            return Response({'error': 'Quantity must be greater than 0.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from apps.branches.models import Branch as BranchModel
+            item = InventoryItem.objects.get(id=item_id)
+            from_branch = BranchModel.objects.get(id=from_branch_id)
+            to_branch = BranchModel.objects.get(id=to_branch_id)
+        except InventoryItem.DoesNotExist:
+            return Response({'error': 'Inventory item not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception:
+            return Response({'error': 'Invalid branch.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if quantity > item.current_stock:
+            return Response(
+                {'error': f'Transfer quantity ({quantity}) exceeds current stock ({item.current_stock}).'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            with transaction.atomic():
+                # Log the transfer
+                transfer = StockTransfer.objects.create(
+                    item=item,
+                    from_branch=from_branch,
+                    to_branch=to_branch,
+                    quantity=quantity,
+                    date=date_str,
+                    notes=notes,
+                )
+
+                # Update branch assignments
+                item.branches.add(to_branch)
+                # Full transfer → remove source branch
+                if quantity >= item.current_stock:
+                    item.branches.remove(from_branch)
+
+                serializer = StockTransferSerializer(transfer)
+                return Response(
+                    {
+                        'message': (
+                            f'Transfer recorded: {quantity} {item.uom} of '
+                            f'"{item.sku} {item.name}" from {from_branch.name} to {to_branch.name}.'
+                        ),
+                        'transfer': serializer.data,
                     },
                     status=status.HTTP_201_CREATED,
                 )

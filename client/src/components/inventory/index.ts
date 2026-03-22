@@ -1,3 +1,11 @@
+// Branch type (from /api/branches/)
+export interface Branch {
+  id: number;
+  name: string;
+  branch_type: 'kitchen' | 'cafe_only';
+  address?: string;
+}
+
 // Inventory Category types
 export interface InventoryCategory {
   id: number;
@@ -21,9 +29,10 @@ export interface InventoryItem {
   category: number;
   category_name: string;
   uom: string;
-  current_stock: string;     // actual on-hand quantity (writable)
-  min_stock_level: string;   // alert threshold
+  current_stock: string;
+  min_stock_level: string;
   status?: string;
+  branches: { id: number; name: string; branch_type: string }[];
   linked_menu_item_details?: {
     id: number;
     sku: string;
@@ -62,6 +71,8 @@ export const INVENTORY_QUERY_KEYS = {
   INVENTORY_CATEGORIES: ['inventoryCategories'],
   LOW_STOCK: ['lowStockItems'],
   BOM_ENTRIES: ['bomEntries'],
+  BRANCHES: ['branches'],
+  TRANSFER_LOGS: ['transferLogs'],
 } as const;
 
 // Unit of Measure options

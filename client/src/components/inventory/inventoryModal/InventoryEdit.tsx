@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
-import { ChevronDown, X, Package, UtensilsCrossed } from "lucide-react";
+import { ChevronDown, X, Package, UtensilsCrossed, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { fetchInventoryCategories } from "../api";
+import { Checkbox } from "@/components/ui/checkbox";
+import { fetchInventoryCategories, fetchBranches } from "../api";
 import { fetchAllMenuItems } from "@/components/menus&Recipes/api";
 import { INVENTORY_QUERY_KEYS, UOM_OPTIONS, type InventoryItem } from "..";
 import { MENU_QUERY_KEYS } from "@/components/menus&Recipes";
@@ -16,6 +17,7 @@ export interface InventoryEditFormData {
   uom: string;
   current_stock: string;
   min_stock_level: string;
+  branch_ids: number[];
   linked_menu_item: number | null;
 }
 
@@ -26,16 +28,19 @@ interface InventoryEditProps {
 }
 
 const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: InventoryEditProps) => {
-  // Fetch categories from API
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: INVENTORY_QUERY_KEYS.INVENTORY_CATEGORIES,
     queryFn: fetchInventoryCategories,
   });
 
-  // Fetch menu items for "Prepared Items" category
   const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery({
     queryKey: MENU_QUERY_KEYS.MENU_ITEMS,
     queryFn: fetchAllMenuItems,
+  });
+
+  const { data: branches = [] } = useQuery({
+    queryKey: INVENTORY_QUERY_KEYS.BRANCHES,
+    queryFn: fetchBranches,
   });
 
   // Category dropdown state
@@ -93,6 +98,14 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
       ...formData,
       [field]: value,
     });
+  };
+
+  const toggleBranch = (branchId: number) => {
+    const current = formData.branch_ids ?? [];
+    const updated = current.includes(branchId)
+      ? current.filter((id) => id !== branchId)
+      : [...current, branchId];
+    onChange({ ...formData, branch_ids: updated });
   };
 
   const handleCategorySelect = (categoryId: number, categoryName: string) => {
@@ -430,6 +443,47 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
             Alert will show when stock falls below this level
           </p>
         </div>
+      </div>
+
+      {/* Row 5: Branch Availability */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <GitBranch className="w-4 h-4 text-blue-600" />
+          <label className="text-sm font-semibold text-gray-700">Branch Availability</label>
+        </div>
+        <p className="text-xs text-gray-500 -mt-1">
+          Select which branches this item is available at. Leave unchecked if available everywhere.
+        </p>
+        {branches.length === 0 ? (
+          <p className="text-sm text-gray-400 italic">No branches registered yet.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {branches.map((branch) => {
+              const checked = (formData.branch_ids ?? []).includes(branch.id);
+              return (
+                <div
+                  key={branch.id}
+                  className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                    checked ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                  onClick={() => toggleBranch(branch.id)}
+                >
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={() => toggleBranch(branch.id)}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <p className="font-medium text-sm text-gray-900">{branch.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {branch.branch_type === 'kitchen' ? 'Full-Service Restaurant' : 'Resto Café'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Info Note */}

@@ -34,6 +34,7 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
     uom: '',
     current_stock: '0',
     min_stock_level: '0',
+    branch_ids: [],
     linked_menu_item: null,
   });
 
@@ -48,6 +49,7 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
         uom: inventoryData.uom,
         current_stock: inventoryData.current_stock,
         min_stock_level: inventoryData.min_stock_level,
+        branch_ids: (inventoryData.branches ?? []).map((b) => b.id),
         linked_menu_item: inventoryData.linked_menu_item_details?.id || null,
       });
     } else if (mode === 'add') {
@@ -59,6 +61,7 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
         uom: '',
         current_stock: '0',
         min_stock_level: '0',
+        branch_ids: [],
         linked_menu_item: null,
       });
     }
@@ -139,6 +142,7 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
       uom: formData.uom,
       current_stock: formData.current_stock,
       min_stock_level: formData.min_stock_level,
+      branch_ids: formData.branch_ids ?? [],
       linked_menu_item: formData.linked_menu_item,
     };
 

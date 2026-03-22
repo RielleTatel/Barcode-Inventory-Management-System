@@ -1,4 +1,4 @@
-import { Package, UtensilsCrossed, AlertTriangle, Link2 } from "lucide-react";
+import { Package, UtensilsCrossed, AlertTriangle, Link2, GitBranch } from "lucide-react";
 import type { InventoryItem } from "..";
 import InfoField from "@/components/ui/modal/InfoField";
 
@@ -99,6 +99,32 @@ const InventoryView = ({ inventoryItem }: InventoryViewProps) => {
           </div>
         </div>
       )}
+
+      {/* Branch Availability */}
+      <div className="bg-blue-50 rounded-lg p-4 space-y-3">
+        <div className="flex items-center gap-2 text-blue-700">
+          <GitBranch className="w-4 h-4" />
+          <h4 className="font-semibold text-sm">Branch Availability</h4>
+        </div>
+        {inventoryItem.branches && inventoryItem.branches.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {inventoryItem.branches.map((branch) => (
+              <span
+                key={branch.id}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />
+                {branch.name}
+                <span className="text-blue-500">
+                  ({branch.branch_type === 'kitchen' ? 'Restaurant' : 'Café'})
+                </span>
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-blue-600 italic">Available at all branches</p>
+        )}
+      </div>
 
       {/* Timestamps */}
       <div className="pt-4 border-t border-gray-200 text-sm text-gray-500">

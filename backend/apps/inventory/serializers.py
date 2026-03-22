@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Category, InventoryItem, StockLevel, StockAdjustment, ConsumptionEntry, BOMEntry
+from .models import Category, InventoryItem, StockLevel, StockAdjustment, StockTransfer, ConsumptionEntry, BOMEntry
 from apps.menusAndRecipes.models import MenuItem
+from apps.branches.models import Branch
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -15,9 +16,23 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.items.count()
 
 
+class BranchSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = ['id', 'name', 'branch_type']
+
+
 class InventoryItemSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     linked_menu_item_details = serializers.SerializerMethodField(read_only=True)
+    branches = BranchSummarySerializer(many=True, read_only=True)
+    branch_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Branch.objects.all(),
+        write_only=True,
+        required=False,
+        source='branches',
+    )
 
     class Meta:
         model = InventoryItem
@@ -30,10 +45,12 @@ class InventoryItemSerializer(serializers.ModelSerializer):
             'uom',
             'current_stock',
             'min_stock_level',
+            'branches',
+            'branch_ids',
             'linked_menu_item',
             'linked_menu_item_details',
             'created_at',
-            'updated_at'
+            'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
@@ -43,7 +60,7 @@ class InventoryItemSerializer(serializers.ModelSerializer):
                 'id': obj.linked_menu_item.id,
                 'sku': obj.linked_menu_item.sku,
                 'name': obj.linked_menu_item.name,
-                'price': str(obj.linked_menu_item.price)
+                'price': str(obj.linked_menu_item.price),
             }
         return None
 
@@ -66,11 +83,25 @@ class InventoryItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Minimum stock level cannot be negative")
         return value
 
+    def create(self, validated_data):
+        branches = validated_data.pop('branches', [])
+        instance = super().create(validated_data)
+        instance.branches.set(branches)
+        return instance
+
+    def update(self, instance, validated_data):
+        branches = validated_data.pop('branches', None)
+        instance = super().update(instance, validated_data)
+        if branches is not None:
+            instance.branches.set(branches)
+        return instance
+
 
 class InventoryItemListSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     status = serializers.SerializerMethodField()
     linked_menu_item_details = serializers.SerializerMethodField(read_only=True)
+    branches = BranchSummarySerializer(many=True, read_only=True)
 
     class Meta:
         model = InventoryItem
@@ -84,9 +115,10 @@ class InventoryItemListSerializer(serializers.ModelSerializer):
             'current_stock',
             'min_stock_level',
             'status',
+            'branches',
             'linked_menu_item_details',
             'created_at',
-            'updated_at'
+            'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
@@ -199,4 +231,29 @@ class ConsumptionEntryListSerializer(serializers.ModelSerializer):
 
     def get_bom_count(self, obj):
         return obj.bom_entries.count()
+
+
+class StockTransferSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    item_sku = serializers.CharField(source='item.sku', read_only=True)
+    from_branch_name = serializers.CharField(source='from_branch.name', read_only=True)
+    to_branch_name = serializers.CharField(source='to_branch.name', read_only=True)
+
+    class Meta:
+        model = StockTransfer
+        fields = [
+            'id',
+            'item',
+            'item_name',
+            'item_sku',
+            'from_branch',
+            'from_branch_name',
+            'to_branch',
+            'to_branch_name',
+            'quantity',
+            'date',
+            'notes',
+            'transferred_at',
+        ]
+        read_only_fields = ['id', 'transferred_at']
 

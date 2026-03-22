@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { fetchAllInventoryItems, fetchInventoryCategories, deleteInventoryItem } from "./api";
+import { fetchAllInventoryItems, fetchInventoryCategories, deleteInventoryItem, fetchBranches } from "./api";
 import { INVENTORY_QUERY_KEYS, type InventoryItem } from ".";
 
 interface InventoriesProps {
@@ -39,6 +39,7 @@ const Inventories = ({ onView, onEdit }: InventoriesProps) => {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
+  const [branchFilter, setBranchFilter] = useState("all");
 
   const { data: items = [], isLoading, isError } = useQuery({
     queryKey: INVENTORY_QUERY_KEYS.INVENTORY_ITEMS,
@@ -71,6 +72,11 @@ const Inventories = ({ onView, onEdit }: InventoriesProps) => {
     queryFn: fetchInventoryCategories,
   });
 
+  const { data: branches = [] } = useQuery({
+    queryKey: INVENTORY_QUERY_KEYS.BRANCHES,
+    queryFn: fetchBranches,
+  });
+
   const filtered = items.filter((item) => {
     const matchesSearch =
       !search ||
@@ -85,7 +91,11 @@ const Inventories = ({ onView, onEdit }: InventoriesProps) => {
       stockFilter === "all" ||
       item.status === stockFilter;
 
-    return matchesSearch && matchesCategory && matchesStock;
+    const matchesBranch =
+      branchFilter === "all" ||
+      (item.branches ?? []).some((b) => b.id.toString() === branchFilter);
+
+    return matchesSearch && matchesCategory && matchesStock && matchesBranch;
   });
 
   return (
@@ -130,6 +140,21 @@ const Inventories = ({ onView, onEdit }: InventoriesProps) => {
                   <SelectItem value="In Stock">In Stock</SelectItem>
                   <SelectItem value="Low Stock">Low Stock</SelectItem>
                   <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <Select value={branchFilter} onValueChange={setBranchFilter}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="Branch" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Branch</SelectLabel>
+                  <SelectItem value="all">All Branches</SelectItem>
+                  {branches.map((b) => (
+                    <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>

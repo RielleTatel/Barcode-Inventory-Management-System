@@ -6,6 +6,7 @@ from .views import (
     StockLevelViewSet,
     StockAdjustmentViewSet,
     ConsumptionEntryViewSet,
+    StockTransferViewSet,
 )
 
 router = DefaultRouter()
@@ -14,6 +15,7 @@ router.register(r'items', InventoryItemViewSet, basename='inventory-item')
 router.register(r'stock-levels', StockLevelViewSet, basename='stock-level')
 router.register(r'adjustments', StockAdjustmentViewSet, basename='stock-adjustment')
 router.register(r'consumption', ConsumptionEntryViewSet, basename='consumption')
+router.register(r'transfers', StockTransferViewSet, basename='stock-transfer')
 
 urlpatterns = [
     path('', include(router.urls)),
