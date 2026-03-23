@@ -77,10 +77,12 @@ const DashboardPage1 = () => {
 
       {/* Page header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Global Overview</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Company-wide stock health across all branches</p>
-        </div>
+
+        <div className="flex flex-col gap-0 items-start">
+          <p className="m-0 text-2xl font-bold text-gray-900 leading-tight">Global Overview</p>
+          <p className="m-0 text-sm text-gray-500 leading-snug">Company-wide stock health across all branches</p>
+        </div> 
+
         <button
           onClick={() => refetch()}
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition-colors"

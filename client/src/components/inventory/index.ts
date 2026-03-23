@@ -3,7 +3,17 @@ export interface Branch {
   id: number;
   name: string;
   branch_type: 'kitchen' | 'cafe_only';
-  address?: string;
+  branch_type_display?: string;
+  address: string;
+  contact_number: string;
+  is_active: boolean;
+}
+
+// Unit of Measurement preset
+export interface UomPreset {
+  id: number;
+  name: string;
+  abbreviation: string;
 }
 
 // Per-branch stock record

@@ -8,10 +8,11 @@ from django.db import models, transaction
 from django.utils import timezone
 
 from .models import (
-    Category, InventoryItem, StockLevel, StockAdjustment,
+    Category, UomPreset, InventoryItem, StockLevel, StockAdjustment,
     StockTransfer, ConsumptionEntry, BOMEntry,
 )
 from .serializers import (
+    UomPresetSerializer,
     CategorySerializer,
     InventoryItemSerializer,
     InventoryItemListSerializer,
@@ -24,6 +25,19 @@ from .serializers import (
 )
 from apps.menusAndRecipes.models import MenuItem, Recipe
 from apps.branches.models import Branch
+
+
+class UomPresetViewSet(viewsets.ModelViewSet):
+    """CRUD for Unit-of-Measurement presets — managed in Settings > Standards."""
+    queryset = UomPreset.objects.all()
+    serializer_class = UomPresetSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'abbreviation']
+    ordering = ['name']
+
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
+    UomPresetViewSet,
     CategoryViewSet,
     InventoryItemViewSet,
     StockLevelViewSet,
@@ -10,6 +11,7 @@ from .views import (
 )
 
 router = DefaultRouter()
+router.register(r'uoms', UomPresetViewSet, basename='inventory-uom')
 router.register(r'categories', CategoryViewSet, basename='inventory-category')
 router.register(r'items', InventoryItemViewSet, basename='inventory-item')
 router.register(r'stock-levels', StockLevelViewSet, basename='stock-level')

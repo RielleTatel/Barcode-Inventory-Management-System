@@ -13,6 +13,20 @@ class Category(models.Model):
         return self.name
 
 
+class UomPreset(models.Model):
+    """Master list of Units of Measurement — keeps dropdowns consistent across items."""
+    name = models.CharField(max_length=50, unique=True, help_text='E.g. "Kilogram", "Piece"')
+    abbreviation = models.CharField(max_length=10, blank=True, default='', help_text='E.g. "kg", "pcs"')
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Unit of Measurement"
+        verbose_name_plural = "Units of Measurement"
+
+    def __str__(self):
+        return f"{self.name} ({self.abbreviation})" if self.abbreviation else self.name
+
+
 class InventoryItem(models.Model):
     """
     Master Product record — the "What."

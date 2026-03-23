@@ -1,4 +1,4 @@
-import api from "@/hooks/api"; 
+import api from "@/hooks/api";
 
 export interface User {
   id: number;
@@ -15,29 +15,40 @@ export interface User {
 
 export const fetchAllUsers = async (): Promise<User[]> => {
   try {
-    const { data } = await api.get('/auth/admin/users/')
-    return data
+    const { data } = await api.get('/auth/admin/users/');
+    return data;
   } catch (err) {
     console.error('Error fetching users:', err);
     return [];
   }
-}
+};
 
 export const updateUser = async (userId: number, updates: Partial<User>): Promise<User | null> => {
   try {
-    const { data } = await api.patch(`/auth/admin/users/${userId}/`, updates)
-    return data
+    const { data } = await api.patch(`/auth/admin/users/${userId}/`, updates);
+    return data;
   } catch (err) {
     console.error('Error updating user:', err);
     return null;
   }
-}
+};
 
 export const deleteUser = async (userId: number): Promise<void> => {
   try {
-    await api.delete(`/auth/admin/users/${userId}/`)
+    await api.delete(`/auth/admin/users/${userId}/`);
   } catch (err) {
     console.error('Error deleting user:', err);
     throw err;
   }
+};
+
+export interface ResetPasswordResult {
+  message: string;
+  new_password: string;
+  warning: string;
 }
+
+export const resetUserPassword = async (userId: number): Promise<ResetPasswordResult> => {
+  const { data } = await api.post(`/auth/admin/users/${userId}/reset-password/`);
+  return data;
+};

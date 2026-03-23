@@ -8,6 +8,7 @@ import Inventory from './pages/Inventory';
 import MenusAndRecipes from './pages/MenusAndRecipes';
 import Supply from './pages/Supply';
 import AdminPanel from './pages/AdminPanel';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -34,7 +35,8 @@ function App() {
             <Route path="menus-recipes" element={<MenusAndRecipes />} />
             <Route path="supply"        element={<Supply />} />
             <Route path="catering"      element={<Catering />} />
-            <Route path="admin"         element={<AdminPanel />} />
+            <Route path="admin"    element={<AdminPanel />} />
+            <Route path="settings" element={<Settings />} />
 
           </Route>
         </Routes>

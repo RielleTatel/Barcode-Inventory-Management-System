@@ -106,13 +106,13 @@ const BranchDashboard = () => {
             title="Back to Global Overview"
           >
             <ArrowLeft className="w-4 h-4 text-gray-500" />
-          </button>
+          </button> 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900">{branch.name}</h1>
+              <h1 className="m-0 text-2xl font-bold text-gray-900 leading-tight">{branch.name}</h1>
               <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">{branchTypeLabel}</span>
             </div>
-            <p className="text-sm text-gray-400 mt-0.5">{branch.address || 'Branch Dashboard'}</p>
+            <p className="m-0 text-sm text-gray-400 leading-snug">{branch.address || 'Branch Dashboard'}</p>
           </div>
         </div>
         <button

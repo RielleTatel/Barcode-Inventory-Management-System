@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -20,49 +21,40 @@ class RegisterSerializer(serializers.ModelSerializer):
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             position=validated_data.get('position', 'staff'),
-            is_active=False, 
-            status=False     
+            is_active=False,
+            status=False,
         )
-        return user 
+        return user
+
 
 class AdminUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-
         fields = [
-            'id', 'email', 'username', 'first_name', 'last_name', 
-            'position', 'status', 'is_active', 'date_joined'
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'position', 'status', 'is_active', 'is_staff', 'date_joined',
         ]
-
         read_only_fields = ['id', 'email', 'date_joined']
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        
         token['email'] = user.email
         token['status'] = user.status
         token['role'] = 'admin' if user.is_superuser else 'user'
-        
         return token
+
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        
         refresh = RefreshToken(attrs['refresh'])
-        
         try:
             user = User.objects.get(id=refresh['user_id'])
-            
             new_refresh = CustomTokenObtainPairSerializer.get_token(user)
-            
             data['access'] = str(new_refresh.access_token)
-            
         except User.DoesNotExist:
             pass
-        
         return data
-
-    

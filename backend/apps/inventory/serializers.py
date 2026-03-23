@@ -1,11 +1,18 @@
 from decimal import Decimal
 from rest_framework import serializers
 from .models import (
-    Category, InventoryItem, StockLevel, StockAdjustment,
+    Category, UomPreset, InventoryItem, StockLevel, StockAdjustment,
     StockTransfer, ConsumptionEntry, BOMEntry,
 )
 from apps.menusAndRecipes.models import MenuItem
 from apps.branches.models import Branch
+
+
+class UomPresetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UomPreset
+        fields = ['id', 'name', 'abbreviation']
+        read_only_fields = ['id']
 
 
 class CategorySerializer(serializers.ModelSerializer):

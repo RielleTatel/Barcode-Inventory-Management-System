@@ -1,11 +1,46 @@
 import api from "@/hooks/api";
-import type { InventoryItem, InventoryItemFormData, InventoryCategory, Branch } from ".";
+import type { InventoryItem, InventoryItemFormData, InventoryCategory, Branch, UomPreset } from ".";
 
 // ── Branches ─────────────────────────────────────────────────────────────────
 
 export const fetchBranches = async (): Promise<Branch[]> => {
   const { data } = await api.get('/branches/');
   return data;
+};
+
+export const createBranch = async (payload: Omit<Branch, 'id' | 'branch_type_display'>): Promise<Branch> => {
+  const { data } = await api.post('/branches/', payload);
+  return data.data ?? data;
+};
+
+export const updateBranch = async (id: number, payload: Partial<Omit<Branch, 'id' | 'branch_type_display'>>): Promise<Branch> => {
+  const { data } = await api.patch(`/branches/${id}/`, payload);
+  return data.data ?? data;
+};
+
+export const deleteBranch = async (id: number): Promise<void> => {
+  await api.delete(`/branches/${id}/`);
+};
+
+// ── UoM Presets ───────────────────────────────────────────────────────────────
+
+export const fetchUomPresets = async (): Promise<UomPreset[]> => {
+  const { data } = await api.get('/inventory/uoms/');
+  return data;
+};
+
+export const createUomPreset = async (payload: { name: string; abbreviation: string }): Promise<UomPreset> => {
+  const { data } = await api.post('/inventory/uoms/', payload);
+  return data;
+};
+
+export const updateUomPreset = async (id: number, payload: { name: string; abbreviation: string }): Promise<UomPreset> => {
+  const { data } = await api.patch(`/inventory/uoms/${id}/`, payload);
+  return data;
+};
+
+export const deleteUomPreset = async (id: number): Promise<void> => {
+  await api.delete(`/inventory/uoms/${id}/`);
 };
 
 // ── Categories ────────────────────────────────────────────────────────────────
@@ -18,6 +53,11 @@ export const fetchInventoryCategories = async (): Promise<InventoryCategory[]> =
 export const createInventoryCategory = async (name: string): Promise<InventoryCategory> => {
   const { data } = await api.post('/inventory/categories/', { name });
   return data;
+};
+
+export const deleteInventoryCategory = async (id: number): Promise<void> => {
+  await api.delete(`/inventory/categories/${id}/`);
+
 };
 
 // ── Inventory Items ───────────────────────────────────────────────────────────
