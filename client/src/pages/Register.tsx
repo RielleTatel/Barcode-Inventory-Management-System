@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
 import axios from 'axios';
+import { API_BASE_URL } from '../hooks/api';
 
 interface RegisterFormData {
   username: string;
@@ -65,7 +66,7 @@ export default function Register() {
 
     try { 
       await axios.post(
-        'http://localhost:8000/api/auth/register/',
+        `${API_BASE_URL}/auth/register/`,
         formData
       );
 

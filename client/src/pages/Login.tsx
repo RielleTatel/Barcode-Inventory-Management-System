@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../hooks/api';
 
 interface LoginFormData {
   email: string;
@@ -34,7 +35,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setLoading(true);
 
   try {
-    const response = await fetch('http://localhost:8000/api/auth/login/', {
+    const response = await fetch(`${API_BASE_URL}/auth/login/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

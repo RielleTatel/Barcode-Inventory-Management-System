@@ -13,9 +13,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9jbo9v+rfn8i7qifns*omldn1vb8uwf)&%b6i_44bh%sbobh46'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True 
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'backend']
+
+def _csv_env_list(name: str, default: list[str]) -> list[str]:
+    value = os.environ.get(name)
+    if not value:
+        return default
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = _csv_env_list(
+    "ALLOWED_HOSTS",
+    ['0.0.0.0', 'localhost', '127.0.0.1', 'backend'],
+)
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -66,10 +77,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-]
+CORS_ALLOWED_ORIGINS = _csv_env_list(
+    "CORS_ALLOWED_ORIGINS",
+    ['http://localhost:5173', 'http://127.0.0.1:5173'],
+)
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -117,7 +128,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.parse('postgresql://neondb_owner:npg_yhB3keJdHfD8@ep-flat-cherry-amaevb9l-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require', conn_max_age=600),
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600),
     }
 else:
     DATABASES = {
