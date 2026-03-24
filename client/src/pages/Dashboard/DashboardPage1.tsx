@@ -79,7 +79,7 @@ const DashboardPage1 = () => {
       <div className="flex items-center justify-between">
 
         <div className="flex flex-col gap-0 items-start">
-          <p className="m-0 text-2xl font-bold text-gray-900 leading-tight">Global Overview</p>
+          <p className="m-0 text-4xl font-bold text-gray-900 leading-tight">Global Overview</p>
           <p className="m-0 text-sm text-gray-500 leading-snug">Company-wide stock health across all branches</p>
         </div> 
 

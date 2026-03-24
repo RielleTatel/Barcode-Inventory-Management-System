@@ -22,7 +22,7 @@ interface MenuItemEditProps {
   formData: MenuItemEditFormData;
 }
 
-const MenuItemEdit = ({ menuItem, onChange, formData }: MenuItemEditProps) => {
+const MenuItemEdit = ({ onChange, formData }: MenuItemEditProps) => {
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: MENU_QUERY_KEYS.MENU_CATEGORIES,
     queryFn: fetchMenuCategories,

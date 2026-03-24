@@ -3,23 +3,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Users, GitBranch, BookOpen, History, Plus, Pencil, Trash2,
-  Check, X, Search, Shield, ShieldOff, RefreshCw, Download,
-  Loader2, KeyRound, ToggleLeft, ToggleRight, Phone, MapPin,
-  ArrowRightLeft, Eye,
+  GitBranch, BookOpen, History, Plus, Pencil, Trash2,
+  Check, X, Search, Download, Loader2, ToggleLeft, ToggleRight,
+  Phone, MapPin, ArrowRightLeft,
 } from "lucide-react";
-import {
-  fetchAllUsers, updateUser, deleteUser, resetUserPassword, type User,
-} from "@/api/accountApi";
 import {
   fetchBranches, createBranch, updateBranch, deleteBranch,
   fetchInventoryCategories, createInventoryCategory, deleteUomPreset,
@@ -32,199 +28,22 @@ import { fetchTransferLogs } from "@/components/inventory/api";
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const TABS = [
-  { key: 'users',     label: 'Users & Access',    icon: Users },
   { key: 'branches',  label: 'Branches',           icon: GitBranch },
   { key: 'standards', label: 'Standards',          icon: BookOpen },
   { key: 'history',   label: 'Transfer History',   icon: History },
 ] as const;
 type TabKey = typeof TABS[number]['key'];
 
-const USER_QUERY_KEY = ['settings', 'users'];
 const TRANSFER_QUERY_KEY = ['settings', 'transfers'];
 
-const fmtDate = (d: string) =>
-  new Date(d).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
 const fmtDateTime = (d: string) =>
   new Date(d).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-// ── Tab: Users & Access ───────────────────────────────────────────────────────
-
-const UsersTab = () => {
-  const qc = useQueryClient();
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'pending' | 'active'>('all');
-  const [resetResult, setResetResult] = useState<{ username: string; password: string } | null>(null);
-
-  const { data: users = [], isLoading } = useQuery({
-    queryKey: USER_QUERY_KEY,
-    queryFn: fetchAllUsers,
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: number; updates: Partial<User> }) => updateUser(id, updates),
-    onSuccess: () => qc.invalidateQueries({ queryKey: USER_QUERY_KEY }),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteUser,
-    onSuccess: () => qc.invalidateQueries({ queryKey: USER_QUERY_KEY }),
-  });
-
-  const resetMutation = useMutation({
-    mutationFn: resetUserPassword,
-    onSuccess: (result, userId) => {
-      const u = users.find(u => u.id === userId);
-      setResetResult({ username: u?.username ?? '', password: result.new_password });
-    },
-    onError: () => alert('Failed to reset password'),
-  });
-
-  const filtered = users.filter(u => {
-    const matchSearch =
-      !search ||
-      u.username.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()) ||
-      `${u.first_name} ${u.last_name}`.toLowerCase().includes(search.toLowerCase());
-    const matchFilter =
-      filter === 'all' ? true :
-      filter === 'pending' ? !u.status :
-      u.status;
-    return matchSearch && matchFilter;
-  });
-
-  return (
-    <div className="flex flex-col gap-y-5">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input placeholder="Search users…" value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-64" />
-          </div>
-          <div className="flex rounded-lg border overflow-hidden text-sm">
-            {(['all', 'pending', 'active'] as const).map(k => (
-              <button key={k} onClick={() => setFilter(k)}
-                className={`px-3 py-1.5 capitalize font-medium transition-colors ${filter === k ? 'bg-[#507ADC] text-white' : 'text-gray-600 hover:bg-gray-50'}`}>
-                {k}
-              </button>
-            ))}
-          </div>
-        </div>
-        <Button variant="outline" className="gap-2" onClick={() => {
-          const csv = ['Username,Name,Email,Role,Status,Date Joined',
-            ...users.map(u => `${u.username},"${u.first_name} ${u.last_name}",${u.email},${u.is_staff ? 'Staff' : 'User'},${u.status ? 'Active' : 'Pending'},${u.date_joined}`)
-          ].join('\n');
-          const blob = new Blob([csv], { type: 'text/csv' });
-          const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'users.csv' });
-          a.click();
-        }}>
-          <Download className="w-4 h-4" /> Export CSV
-        </Button>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white border border-[#E5E5E5] rounded-xl overflow-hidden">
-        <Table>
-          <TableHeader className="bg-[#F9FAFB]">
-            <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Position</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Joined</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-10"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></TableCell></TableRow>
-            ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-gray-400">No users found</TableCell></TableRow>
-            ) : filtered.map(u => (
-              <TableRow key={u.id} className="hover:bg-gray-50">
-                <TableCell>
-                  <p className="font-semibold text-sm">{u.username}</p>
-                  <p className="text-xs text-gray-400">{u.first_name} {u.last_name}</p>
-                </TableCell>
-                <TableCell className="text-sm text-gray-600">{u.email}</TableCell>
-                <TableCell>
-                  <span className="text-xs capitalize px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{u.position ?? 'staff'}</span>
-                </TableCell>
-                <TableCell>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${u.is_staff ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
-                    {u.is_staff ? 'Staff' : 'User'}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${u.status ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {u.status ? 'Active' : 'Pending'}
-                  </span>
-                </TableCell>
-                <TableCell className="text-xs text-gray-400">{fmtDate(u.date_joined)}</TableCell>
-                <TableCell>
-                  <div className="flex justify-end gap-1">
-                    {!u.status && (
-                      <button onClick={() => updateMutation.mutate({ id: u.id, updates: { status: true, is_active: true } })}
-                        title="Approve" className="p-1.5 hover:bg-green-50 rounded text-green-600">
-                        <Check className="w-4 h-4" />
-                      </button>
-                    )}
-                    {u.status && (
-                      <button onClick={() => updateMutation.mutate({ id: u.id, updates: { status: false, is_active: false } })}
-                        title="Deactivate" className="p-1.5 hover:bg-amber-50 rounded text-amber-500">
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                    <button onClick={() => updateMutation.mutate({ id: u.id, updates: { is_staff: !u.is_staff } })}
-                      title={u.is_staff ? 'Remove Staff Role' : 'Make Staff'}
-                      className="p-1.5 hover:bg-blue-50 rounded text-blue-500">
-                      {u.is_staff ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
-                    </button>
-                    <button onClick={() => { if (window.confirm(`Reset password for "${u.username}"?`)) resetMutation.mutate(u.id); }}
-                      title="Reset Password" className="p-1.5 hover:bg-purple-50 rounded text-purple-500"
-                      disabled={resetMutation.isPending}>
-                      <KeyRound className="w-4 h-4" />
-                    </button>
-                    {!u.is_staff && (
-                      <button onClick={() => { if (window.confirm(`Remove user "${u.username}"?`)) deleteMutation.mutate(u.id); }}
-                        title="Delete" className="p-1.5 hover:bg-red-50 rounded text-red-400">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Password reset result dialog */}
-      <Dialog open={!!resetResult} onOpenChange={() => setResetResult(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><KeyRound className="w-5 h-5 text-purple-500" /> Password Reset</DialogTitle>
-            <DialogDescription>
-              The password for <strong>{resetResult?.username}</strong> has been reset. Share it now — it won't be shown again.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="bg-gray-50 border rounded-lg p-4 text-center">
-            <p className="text-xs text-gray-400 mb-1 uppercase tracking-wide">New Temporary Password</p>
-            <p className="text-2xl font-mono font-bold text-gray-900 tracking-widest">{resetResult?.password}</p>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setResetResult(null)}>Done — I've Noted It</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
 // ── Tab: Branches ─────────────────────────────────────────────────────────────
 
-const EMPTY_BRANCH = { name: '', branch_type: 'kitchen' as const, address: '', contact_number: '', is_active: true };
+const EMPTY_BRANCH: { name: string; branch_type: 'kitchen' | 'cafe_only'; address: string; contact_number: string; is_active: boolean } = {
+  name: '', branch_type: 'kitchen', address: '', contact_number: '', is_active: true,
+};
 
 const BranchesTab = () => {
   const qc = useQueryClient();
@@ -309,8 +128,11 @@ const BranchesTab = () => {
                     {b.branch_type === 'kitchen' ? 'Full-Service' : 'Café Only'}
                   </span>
                 </TableCell>
-                <TableCell className="text-sm text-gray-500">
-                  <div className="flex items-center gap-1"><MapPin className="w-3 h-3 shrink-0" />{b.address || '—'}</div>
+                <TableCell className="text-sm text-gray-500 max-w-[150px]">
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{b.address || '—'}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="text-sm text-gray-500">
                   <div className="flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" />{b.contact_number || '—'}</div>
@@ -394,19 +216,19 @@ const CategoryManager = () => {
   const [newName, setNewName] = useState('');
 
   const { data: categories = [] } = useQuery({
-    queryKey: INVENTORY_QUERY_KEYS.CATEGORIES,
+    queryKey: INVENTORY_QUERY_KEYS.INVENTORY_CATEGORIES,
     queryFn: fetchInventoryCategories,
   });
 
   const createMutation = useMutation({
     mutationFn: () => createInventoryCategory(newName.trim()),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: INVENTORY_QUERY_KEYS.CATEGORIES }); setNewName(''); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: INVENTORY_QUERY_KEYS.INVENTORY_CATEGORIES }); setNewName(''); },
     onError: (e: any) => alert(e.response?.data?.name?.[0] ?? 'Failed to create category'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteInventoryCategory,
-    onSuccess: () => qc.invalidateQueries({ queryKey: INVENTORY_QUERY_KEYS.CATEGORIES }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: INVENTORY_QUERY_KEYS.INVENTORY_CATEGORIES }),
     onError: (e: any) => alert(e.response?.data?.error ?? 'Cannot delete — category still has items'),
   });
 
@@ -637,11 +459,10 @@ const HistoryTab = () => {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState<TabKey>('users');
+  const [activeTab, setActiveTab] = useState<TabKey>('branches');
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'users':     return <UsersTab />;
       case 'branches':  return <BranchesTab />;
       case 'standards': return <StandardsTab />;
       case 'history':   return <HistoryTab />;
@@ -653,7 +474,7 @@ const Settings = () => {
       {/* Header */}
       <div>
         <p className="text-[32px] font-bold">Settings</p>
-        <p className="text-sm text-gray-500">Manage users, branches, standards, and system history</p>
+        <p className="text-sm text-gray-500">Manage branches, standards, and system history</p>
       </div>
 
       {/* Tab bar */}

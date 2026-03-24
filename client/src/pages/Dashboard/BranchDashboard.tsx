@@ -100,16 +100,9 @@ const BranchDashboard = () => {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors mt-0.5"
-            title="Back to Global Overview"
-          >
-            <ArrowLeft className="w-4 h-4 text-gray-500" />
-          </button> 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="m-0 text-2xl font-bold text-gray-900 leading-tight">{branch.name}</h1>
+              <p className="m-0 text-4xl font-bold text-gray-900 leading-tight">{branch.name}</p>
               <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">{branchTypeLabel}</span>
             </div>
             <p className="m-0 text-sm text-gray-400 leading-snug">{branch.address || 'Branch Dashboard'}</p>

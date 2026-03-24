@@ -6,7 +6,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Search, Pencil, Eye, Archive, RotateCcw, Plus, Loader2, Building2, X,
+  Search, Pencil, Eye, Archive, RotateCcw, Plus, Loader2, Building2,
 } from "lucide-react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,

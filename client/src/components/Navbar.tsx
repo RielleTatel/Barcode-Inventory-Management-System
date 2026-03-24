@@ -72,8 +72,6 @@ const Navbar = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  const isDashboardActive = location.pathname.startsWith('/dashboard');
-
   return (
     <div className="shadow-md h-auto min-h-full w-70 bg-white rounded-[40px] p-5 flex flex-col gap-1 font-sans text-text-color self-stretch border border-[#E5E5E5]">
 

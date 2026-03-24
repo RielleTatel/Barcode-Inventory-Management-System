@@ -38,22 +38,6 @@ const [modalState, setModalState] = useState<{
     });
   };
 
-  const openViewModal = (item: MenuItem) => {
-    setModalState({
-      isOpen: true,
-      mode: 'view',
-      menuItem: item,
-    });
-  };
-
-  const openEditModal = (item: MenuItem) => {
-    setModalState({
-      isOpen: true,
-      mode: 'edit',
-      menuItem: item,
-    });
-  };
-
   const closeModal = () => {
     setModalState({
       isOpen: false,

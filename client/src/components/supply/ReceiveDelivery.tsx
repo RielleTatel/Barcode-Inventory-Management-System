@@ -38,7 +38,7 @@ interface ItemPickerProps {
 }
 
 const ItemPicker = ({
-  rowId, value, displayValue, inventoryItems, usedItemIds, onSelect, onClear,
+  value, displayValue, inventoryItems, usedItemIds, onSelect, onClear,
 }: ItemPickerProps) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
