@@ -1,6 +1,5 @@
 from django.db import models
 from apps.branches.models import Branch
-from apps.inventory.models import InventoryItem
 
 
 class Supplier(models.Model):
@@ -72,17 +71,29 @@ class Delivery(models.Model):
 
 
 class DeliveryItem(models.Model):
-    """One inventory item line inside a Delivery."""
+    """
+    One supply item line inside a Delivery.
+    Stores raw text fields (no FK to InventoryItem) so Supply is independent.
+    """
     delivery = models.ForeignKey(Delivery, on_delete=models.CASCADE, related_name='delivery_items')
-    item = models.ForeignKey(InventoryItem, on_delete=models.PROTECT, related_name='delivery_items')
+    item_name = models.CharField(max_length=200)
+    item_sku = models.CharField(max_length=50)
+    item_uom = models.CharField(max_length=20)
+    item_category = models.CharField(max_length=100, blank=True, default='')
     quantity_received = models.DecimalField(max_digits=10, decimal_places=2)
     cost = models.DecimalField(max_digits=10, decimal_places=2, help_text='Cost per unit')
-
-    class Meta:
-        unique_together = ['delivery', 'item']
+    
+    # Legacy FK kept as nullable for old records; new records leave it null
+    item = models.ForeignKey(
+        'inventory.InventoryItem',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='delivery_items',
+    )
 
     def __str__(self):
-        return f"{self.item.name}: {self.quantity_received} {self.item.uom} @ ₱{self.cost}"
+        return f"{self.item_name}: {self.quantity_received} {self.item_uom} @ ₱{self.cost}"
 
     @property
     def total_cost(self):

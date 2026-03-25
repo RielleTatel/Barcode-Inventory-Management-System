@@ -13,7 +13,6 @@ from .serializers import (
     DeliveryListSerializer,
     DeliveryItemWriteSerializer,
 )
-from apps.inventory.models import InventoryItem, StockLevel
 from apps.branches.models import Branch
 
 
@@ -71,7 +70,7 @@ class SupplierViewSet(viewsets.ModelViewSet):
 class DeliveryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Purchase History — read-only from the UI.
-    Only the /receive/ action creates records (and updates StockLevel).
+    Only the /receive/ action creates records (purchase log only, no inventory updates).
 
     GET  /supply/deliveries/          — list
     GET  /supply/deliveries/{id}/     — detail with full item list
@@ -86,7 +85,7 @@ class DeliveryViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         qs = Delivery.objects.select_related('supplier', 'branch').prefetch_related(
-            'delivery_items__item__category'
+            'delivery_items'
         )
         # Optional date range filters
         date_from = self.request.query_params.get('date_from')
@@ -116,14 +115,20 @@ class DeliveryViewSet(viewsets.ReadOnlyModelViewSet):
           "received_by": "Chef Juan",      // optional
           "notes": "...",                  // optional
           "items": [
-            { "item_id": 5, "quantity_received": 20, "cost": 280 },
+            {
+              "item_name": "Fresh Chicken Breast",
+              "item_sku": "SUP-CH-001",
+              "item_uom": "kg",
+              "item_category": "Meat",
+              "quantity_received": 20,
+              "cost": 280
+            },
             ...
           ]
         }
 
-        Simultaneously:
-        1. Creates a Delivery record + DeliveryItem lines (the log / evidence)
-        2. Updates (or creates) the branch-specific StockLevel for each item
+        Creates a Delivery record + DeliveryItem lines (purchase history only).
+        Does NOT update inventory stock levels.
         """
         supplier_id = request.data.get('supplier_id')
         branch_id = request.data.get('branch_id')
@@ -157,16 +162,6 @@ class DeliveryViewSet(viewsets.ReadOnlyModelViewSet):
         except Branch.DoesNotExist:
             return Response({'error': 'Branch not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Resolve inventory items upfront
-        item_data_list = []
-        for s in item_serializers:
-            vd = s.validated_data
-            try:
-                inv_item = InventoryItem.objects.get(id=vd['item_id'])
-            except InventoryItem.DoesNotExist:
-                return Response({'error': f"Inventory item {vd['item_id']} not found"}, status=status.HTTP_404_NOT_FOUND)
-            item_data_list.append((inv_item, vd['quantity_received'], vd['cost']))
-
         # ── Atomic handshake ──────────────────────────────────────────────────
         try:
             with transaction.atomic():
@@ -179,30 +174,23 @@ class DeliveryViewSet(viewsets.ReadOnlyModelViewSet):
                     notes=notes,
                 )
 
-                for inv_item, qty, cost in item_data_list:
-                    # 1. Log the delivery item
+                for s in item_serializers:
+                    vd = s.validated_data
                     DeliveryItem.objects.create(
                         delivery=delivery,
-                        item=inv_item,
-                        quantity_received=qty,
-                        cost=cost,
-                    )
-                    # 2. Add to branch StockLevel
-                    sl, _ = StockLevel.objects.get_or_create(
-                        item=inv_item,
-                        branch=branch,
-                        defaults={'quantity': Decimal('0'), 'threshold': Decimal('0')},
-                    )
-                    StockLevel.objects.filter(pk=sl.pk).update(
-                        quantity=models.F('quantity') + qty
+                        item_name=vd['item_name'],
+                        item_sku=vd['item_sku'],
+                        item_uom=vd['item_uom'],
+                        item_category=vd.get('item_category', ''),
+                        quantity_received=vd['quantity_received'],
+                        cost=vd['cost'],
                     )
 
                 return Response(
                     {
                         'message': (
-                            f'Delivery received: {len(item_data_list)} item(s) added to '
-                            f'{branch.name} from {supplier.name}. '
-                            f'Stock levels updated.'
+                            f'Delivery received: {len(item_serializers)} item(s) logged for '
+                            f'{branch.name} from {supplier.name}.'
                         ),
                         'delivery': DeliverySerializer(delivery).data,
                     },

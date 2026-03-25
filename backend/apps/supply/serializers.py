@@ -27,16 +27,12 @@ class SupplierSerializer(serializers.ModelSerializer):
 
 
 class DeliveryItemSerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(source='item.name', read_only=True)
-    item_sku = serializers.CharField(source='item.sku', read_only=True)
-    item_uom = serializers.CharField(source='item.uom', read_only=True)
-    item_category = serializers.CharField(source='item.category.name', read_only=True)
     total_cost = serializers.SerializerMethodField()
 
     class Meta:
         model = DeliveryItem
         fields = [
-            'id', 'item', 'item_name', 'item_sku', 'item_uom', 'item_category',
+            'id', 'item_name', 'item_sku', 'item_uom', 'item_category',
             'quantity_received', 'cost', 'total_cost',
         ]
         read_only_fields = ['id']
@@ -47,7 +43,10 @@ class DeliveryItemSerializer(serializers.ModelSerializer):
 
 class DeliveryItemWriteSerializer(serializers.Serializer):
     """Used for nested writes inside the receive endpoint."""
-    item_id = serializers.IntegerField()
+    item_name = serializers.CharField(max_length=200)
+    item_sku = serializers.CharField(max_length=50)
+    item_uom = serializers.CharField(max_length=20)
+    item_category = serializers.CharField(max_length=100, required=False, allow_blank=True)
     quantity_received = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0.01'))
     cost = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0'))
 
@@ -99,8 +98,8 @@ class DeliveryListSerializer(serializers.ModelSerializer):
 
     def get_items_summary(self, obj):
         return [
-            f"{di.item.name} ({di.quantity_received} {di.item.uom})"
-            for di in obj.delivery_items.select_related('item').all()
+            f"{di.item_name} ({di.quantity_received} {di.item_uom})"
+            for di in obj.delivery_items.all()
         ]
 
     def get_item_count(self, obj):

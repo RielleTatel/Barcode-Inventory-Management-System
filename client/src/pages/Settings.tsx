@@ -97,11 +97,6 @@ const BranchesTab = () => {
 
   return (
     <div className="flex flex-col gap-y-5">
-      <div className="flex justify-end">
-        <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={openAdd}>
-          <Plus className="w-4 h-4" /> Add Branch
-        </Button>
-      </div>
 
       <div className="bg-white border border-[#E5E5E5] rounded-xl overflow-hidden">
         <Table>
@@ -156,7 +151,13 @@ const BranchesTab = () => {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </Table> 
+      </div> 
+
+      <div className="flex justify-end">
+        <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={openAdd}>
+          <Plus className="w-4 h-4" /> Add Branch
+        </Button>
       </div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
@@ -381,18 +382,20 @@ const HistoryTab = () => {
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="relative">
+          <div className="relative bg-white">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input placeholder="Search item, SKU, branch…" value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-64" />
           </div>
-          <div className="flex rounded-lg border overflow-hidden text-sm">
+
+          <div className="flex rounded-lg border overflow-hidden text-sm bg-white">
             {['all', 'initiated', 'in_transit', 'received', 'cancelled'].map(k => (
               <button key={k} onClick={() => setStatusFilter(k)}
                 className={`px-3 py-1.5 capitalize font-medium transition-colors ${statusFilter === k ? 'bg-[#507ADC] text-white' : 'text-gray-600 hover:bg-gray-50'}`}>
                 {k.replace('_', ' ')}
               </button>
             ))}
-          </div>
+          </div> 
+
         </div>
         <Button variant="outline" className="gap-2" onClick={exportCSV}>
           <Download className="w-4 h-4" /> Export CSV

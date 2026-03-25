@@ -32,7 +32,6 @@ export interface SupplierFormData {
 
 export interface DeliveryItem {
   id: number;
-  item: number;
   item_name: string;
   item_sku: string;
   item_uom: string;
@@ -64,7 +63,10 @@ export interface Delivery {
 
 export interface ReceiveItemRow {
   _id: number;
-  item_id: string;
+  item_name: string;
+  item_sku: string;
+  item_uom: string;
+  item_category: string;
   quantity_received: string;
   cost: string;
 }
@@ -76,7 +78,14 @@ export interface ReceivePayload {
   received_date: string;
   received_by?: string;
   notes?: string;
-  items: { item_id: number; quantity_received: number; cost: number }[];
+  items: {
+    item_name: string;
+    item_sku: string;
+    item_uom: string;
+    item_category?: string;
+    quantity_received: number;
+    cost: number;
+  }[];
 }
 
 // ── Legacy types (kept for gradual migration) ─────────────────────────────────

@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import {
-  PackageCheck, ClipboardList, Plus, Trash2, Search,
+  PackageCheck, ClipboardList, Plus, Trash2,
   Loader2, CheckCircle2, AlertTriangle,
 } from "lucide-react";
 import {
@@ -15,145 +14,18 @@ import {
 } from "@/components/ui/select";
 import { fetchSuppliers, receiveDelivery } from "./api";
 import { SUPPLY_QUERY_KEYS, type ReceiveItemRow } from "./supplier-types";
-import { fetchAllInventoryItems, fetchBranches } from "@/components/inventory/api";
+import { fetchBranches } from "@/components/inventory/api";
 import { INVENTORY_QUERY_KEYS } from "@/components/inventory";
 
 const newRow = (): ReceiveItemRow => ({
   _id: Date.now() + Math.random(),
-  item_id: '',
+  item_name: '',
+  item_sku: '',
+  item_uom: '',
+  item_category: '',
   quantity_received: '',
   cost: '',
 });
-
-// ── Searchable item picker (portal-based so it escapes table overflow) ────────
-
-interface ItemPickerProps {
-  rowId: number;
-  value: string;
-  displayValue: string;
-  inventoryItems: ReturnType<typeof fetchAllInventoryItems> extends Promise<infer T> ? T : never;
-  usedItemIds: string[];
-  onSelect: (itemId: string, itemName: string) => void;
-  onClear: () => void;
-}
-
-const ItemPicker = ({
-  value, displayValue, inventoryItems, usedItemIds, onSelect, onClear,
-}: ItemPickerProps) => {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
-
-  // Sync display when a value is selected externally (e.g., row reset)
-  useEffect(() => {
-    if (!value) setSearch('');
-  }, [value]);
-
-  const openDropdown = () => {
-    if (inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      setDropdownStyle({
-        position: 'fixed',
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: Math.max(rect.width, 320),
-        zIndex: 9999,
-      });
-    }
-    setOpen(true);
-  };
-
-  const closeDropdown = () => setOpen(false);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-    onClear();
-    openDropdown();
-  };
-
-  const handleFocus = () => {
-    if (blurTimer.current) clearTimeout(blurTimer.current);
-    openDropdown();
-  };
-
-  const handleBlur = () => {
-    blurTimer.current = setTimeout(() => closeDropdown(), 150);
-  };
-
-  const handleItemClick = (itemId: string, itemName: string) => {
-    if (blurTimer.current) clearTimeout(blurTimer.current);
-    setSearch(itemName);
-    onSelect(itemId, itemName);
-    closeDropdown();
-    inputRef.current?.blur();
-  };
-
-  const filtered = inventoryItems.filter(item => {
-    if (usedItemIds.includes(String(item.id))) return false;
-    if (!search) return true;
-    return (
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.sku.toLowerCase().includes(search.toLowerCase())
-    );
-  });
-
-  // Show item name when already selected (not searching)
-  const inputValue = value && !open ? (displayValue || search) : search;
-
-  return (
-    <div className="relative">
-      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none z-10" />
-      <input
-        ref={inputRef}
-        value={inputValue}
-        onChange={handleInputChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        placeholder="Search item by name or SKU…"
-        className="w-full h-9 pl-7 pr-2 text-sm border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-        autoComplete="off"
-      />
-      {value && !open && (
-        <button
-          onMouseDown={e => { e.preventDefault(); onClear(); setSearch(''); openDropdown(); inputRef.current?.focus(); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
-          tabIndex={-1}
-        >✕</button>
-      )}
-
-      {open && typeof window !== 'undefined' && createPortal(
-        <div
-          style={dropdownStyle}
-          className="bg-white border border-gray-200 rounded-lg shadow-xl max-h-52 overflow-auto"
-        >
-          {filtered.length === 0
-            ? <div className="px-3 py-3 text-xs text-gray-400 text-center">No inventory items found</div>
-            : filtered.map(item => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-blue-50 text-sm border-b last:border-0"
-                onClick={() => handleItemClick(String(item.id), item.name)}
-              >
-                <div className="flex flex-col min-w-0">
-                  <span className="text-gray-900 truncate">{item.name}</span>
-                  <span className="font-mono text-xs text-gray-400">{item.sku}</span>
-                </div>
-                <span className={`ml-2 shrink-0 text-xs px-1.5 py-0.5 rounded-full ${
-                  item.stock_status === 'Low Stock' ? 'bg-amber-100 text-amber-700' :
-                  item.stock_status === 'Out of Stock' ? 'bg-red-100 text-red-700' :
-                  'bg-gray-100 text-gray-500'
-                }`}>{item.total_stock} {item.uom}</span>
-              </div>
-            ))
-          }
-        </div>,
-        document.body
-      )}
-    </div>
-  );
-};
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -167,8 +39,6 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
   const [receivedBy, setReceivedBy] = useState('');
   const [notes, setNotes] = useState('');
   const [rows, setRows] = useState<ReceiveItemRow[]>([newRow()]);
-  // Display names for each row's selected item (separate from rows state for cleanliness)
-  const [rowLabels, setRowLabels] = useState<Record<number, string>>({});
   const [successMsg, setSuccessMsg] = useState('');
 
   const { data: suppliers = [] } = useQuery({
@@ -181,19 +51,13 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
     queryFn: fetchBranches,
   });
 
-  const { data: inventoryItems = [] } = useQuery({
-    queryKey: INVENTORY_QUERY_KEYS.INVENTORY_ITEMS,
-    queryFn: fetchAllInventoryItems,
-  });
-
   const receiveMutation = useMutation({
     mutationFn: receiveDelivery,
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: INVENTORY_QUERY_KEYS.INVENTORY_ITEMS });
       queryClient.invalidateQueries({ queryKey: SUPPLY_QUERY_KEYS.DELIVERIES });
       setSuccessMsg(result.message);
       setSupplierId(''); setBranchId(''); setDrNumber(''); setReceivedBy(''); setNotes('');
-      setRows([newRow()]); setRowLabels({});
+      setRows([newRow()]);
       onDeliverySuccess?.();
     },
     onError: (e: any) => {
@@ -205,21 +69,10 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
 
   const removeRow = (id: number) => {
     setRows(prev => prev.length > 1 ? prev.filter(r => r._id !== id) : prev);
-    setRowLabels(prev => { const next = { ...prev }; delete next[id]; return next; });
   };
 
   const updateRow = (id: number, field: keyof ReceiveItemRow, value: string) =>
     setRows(prev => prev.map(r => r._id === id ? { ...r, [field]: value } : r));
-
-  const selectItem = (rowId: number, itemId: string, itemName: string) => {
-    updateRow(rowId, 'item_id', itemId);
-    setRowLabels(prev => ({ ...prev, [rowId]: itemName }));
-  };
-
-  const clearItem = (rowId: number) => {
-    updateRow(rowId, 'item_id', '');
-    setRowLabels(prev => { const next = { ...prev }; delete next[rowId]; return next; });
-  };
 
   const totalCost = rows.reduce((sum, r) => {
     return sum + (parseFloat(r.quantity_received) || 0) * (parseFloat(r.cost) || 0);
@@ -230,10 +83,25 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
     if (!branchId) { alert("Please select a receiving branch"); return; }
     if (!receivedDate) { alert("Please set the received date"); return; }
 
-    const validRows = rows.filter(r => r.item_id !== '' && r.quantity_received !== '' && r.cost !== '');
-    if (validRows.length === 0) { alert("Please add at least one item — select it from the dropdown, then enter quantity and cost"); return; }
-    if (validRows.find(r => Number(r.quantity_received) <= 0)) { alert("Quantity must be greater than 0"); return; }
-    if (validRows.find(r => Number(r.cost) < 0)) { alert("Cost cannot be negative"); return; }
+    const validRows = rows.filter(r =>
+      r.item_name.trim() !== '' &&
+      r.item_sku.trim() !== '' &&
+      r.item_uom.trim() !== '' &&
+      r.quantity_received !== '' &&
+      r.cost !== ''
+    );
+    if (validRows.length === 0) {
+      alert("Please add at least one item with name, SKU, UOM, quantity, and cost");
+      return;
+    }
+    if (validRows.find(r => Number(r.quantity_received) <= 0)) {
+      alert("Quantity must be greater than 0");
+      return;
+    }
+    if (validRows.find(r => Number(r.cost) < 0)) {
+      alert("Cost cannot be negative");
+      return;
+    }
 
     receiveMutation.mutate({
       supplier_id: Number(supplierId),
@@ -243,7 +111,10 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
       received_by: receivedBy,
       notes,
       items: validRows.map(r => ({
-        item_id: Number(r.item_id),
+        item_name: r.item_name,
+        item_sku: r.item_sku,
+        item_uom: r.item_uom,
+        item_category: r.item_category,
         quantity_received: Number(r.quantity_received),
         cost: Number(r.cost),
       })),
@@ -263,7 +134,7 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
           <p className="font-bold text-2xl">Log Incoming Delivery</p>
         </div>
         <p className="text-sm text-gray-500">
-          Fill in the delivery header, add each item received, then click Confirm. Stock levels update instantly.
+          Fill in the delivery header, add each item received (as free text), then click Confirm to log the purchase.
         </p>
       </div>
 
@@ -343,7 +214,7 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
             <ClipboardList className="w-5 h-5 text-gray-600" />
             <p className="font-bold text-lg">Items Received</p>
             <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-              {rows.filter(r => r.item_id !== '').length} item(s) selected
+              {rows.filter(r => r.item_name.trim() !== '').length} item(s) entered
             </span>
           </div>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={addRow}>
@@ -355,38 +226,56 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
           <Table>
             <TableHeader className="bg-[#F9FAFB]">
               <TableRow>
-                <TableHead className="text-[#94979F] w-72">Inventory Item</TableHead>
-                <TableHead className="text-[#94979F] w-28">Category</TableHead>
-                <TableHead className="text-[#94979F] w-32">Qty Received</TableHead>
-                <TableHead className="text-[#94979F] w-12 text-xs">UOM</TableHead>
-                <TableHead className="text-[#94979F] w-32">Unit Cost (₱)</TableHead>
+                <TableHead className="text-[#94979F]">Item Name</TableHead>
+                <TableHead className="text-[#94979F]">SKU</TableHead>
+                <TableHead className="text-[#94979F]">Category</TableHead>
+                <TableHead className="text-[#94979F]">UOM</TableHead>
+                <TableHead className="text-[#94979F]">Qty Received</TableHead>
+                <TableHead className="text-[#94979F]">Unit Cost (₱)</TableHead>
                 <TableHead className="text-[#94979F] text-right">Row Total</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map(row => {
-                const selectedItem = inventoryItems.find(i => String(i.id) === row.item_id);
-                const usedIds = rows.filter(r => r._id !== row._id).map(r => r.item_id).filter(Boolean);
                 const rowTotal = (parseFloat(row.quantity_received) || 0) * (parseFloat(row.cost) || 0);
 
                 return (
                   <TableRow key={row._id}>
-                    {/* Item picker — portal-based to escape table overflow */}
                     <TableCell className="py-2">
-                      <ItemPicker
-                        rowId={row._id}
-                        value={row.item_id}
-                        displayValue={rowLabels[row._id] ?? ''}
-                        inventoryItems={inventoryItems}
-                        usedItemIds={usedIds}
-                        onSelect={(itemId, itemName) => selectItem(row._id, itemId, itemName)}
-                        onClear={() => clearItem(row._id)}
+                      <Input
+                        placeholder="e.g., Fresh Chicken Breast"
+                        value={row.item_name}
+                        onChange={e => updateRow(row._id, 'item_name', e.target.value)}
+                        className="h-9 w-48"
                       />
                     </TableCell>
 
-                    <TableCell className="text-sm text-gray-500 py-2">
-                      {selectedItem?.category_name ?? <span className="text-gray-300">—</span>}
+                    <TableCell className="py-2">
+                      <Input
+                        placeholder="e.g., SUP-CH-001"
+                        value={row.item_sku}
+                        onChange={e => updateRow(row._id, 'item_sku', e.target.value)}
+                        className="h-9 w-32"
+                      />
+                    </TableCell>
+
+                    <TableCell className="py-2">
+                      <Input
+                        placeholder="e.g., Meat"
+                        value={row.item_category}
+                        onChange={e => updateRow(row._id, 'item_category', e.target.value)}
+                        className="h-9 w-32"
+                      />
+                    </TableCell>
+
+                    <TableCell className="py-2">
+                      <Input
+                        placeholder="kg"
+                        value={row.item_uom}
+                        onChange={e => updateRow(row._id, 'item_uom', e.target.value)}
+                        className="h-9 w-20"
+                      />
                     </TableCell>
 
                     <TableCell className="py-2">
@@ -395,12 +284,8 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
                         placeholder="0"
                         value={row.quantity_received}
                         onChange={e => updateRow(row._id, 'quantity_received', e.target.value)}
-                        className="h-9 text-right w-28"
+                        className="h-9 text-right w-24"
                       />
-                    </TableCell>
-
-                    <TableCell className="text-xs text-gray-400 uppercase py-2">
-                      {selectedItem?.uom ?? <span className="text-gray-300">—</span>}
                     </TableCell>
 
                     <TableCell className="py-2">
@@ -409,7 +294,7 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
                         placeholder="0.00"
                         value={row.cost}
                         onChange={e => updateRow(row._id, 'cost', e.target.value)}
-                        className="h-9 text-right w-28"
+                        className="h-9 text-right w-24"
                       />
                     </TableCell>
 
@@ -458,7 +343,7 @@ const ReceiveDelivery = ({ onDeliverySuccess }: { onDeliverySuccess?: () => void
       >
         {receiveMutation.isPending
           ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
-          : <><PackageCheck className="w-5 h-5" /> Confirm Delivery &amp; Update Stock</>
+          : <><PackageCheck className="w-5 h-5" /> Confirm Delivery</>
         }
       </Button>
     </div>

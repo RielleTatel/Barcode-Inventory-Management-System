@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models, transaction
+from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
 from .models import (
@@ -74,6 +75,31 @@ class InventoryItemViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return InventoryItemListSerializer
         return InventoryItemSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.transfer_items.exists():
+            return Response(
+                {
+                    'error': (
+                        'Cannot delete this inventory item because it is still referenced by '
+                        'branch transfer request line(s). Remove or change those records first, or archive the item instead.'
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {
+                    'error': (
+                        'Cannot delete this inventory item because other records still depend on it '
+                        '(protected foreign keys).'
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @action(detail=False, methods=['get'])
     def by_category(self, request):
