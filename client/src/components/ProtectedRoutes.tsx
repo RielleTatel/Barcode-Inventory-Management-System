@@ -27,7 +27,10 @@ const ProtectedRoute = ({ children, requiredRole = null }: ProtectedRouteProps) 
     return <Navigate to="/login" replace />;
   }
 
-  if (user && !user.status) {
+  const canAccessApp =
+    user.status === true || user.role === 'admin';
+
+  if (user && !canAccessApp) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background-primary">
         <div className="text-center max-w-md p-8 bg-white rounded-lg shadow-lg">

@@ -42,7 +42,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['email'] = user.email
-        token['status'] = user.status
+        # Staff/superuser can use the app without the registration "approval" flag.
+        token['status'] = bool(
+            user.status or user.is_superuser or user.is_staff
+        )
         token['role'] = 'admin' if user.is_superuser else 'user'
         return token
 
