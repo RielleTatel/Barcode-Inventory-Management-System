@@ -65,7 +65,21 @@ const InventoryItemModal = ({ isOpen, onClose, mode, inventoryData }: inventoryM
       onClose();
     },
     onError: (error: any) => {
-      alert(error.response?.data?.sku?.[0] || error.response?.data?.message || "Failed to create inventory item");
+      const errorData = error.response?.data;
+      let errorMsg = "Failed to create inventory item";
+      
+      if (typeof errorData === 'object') {
+        if (errorData.sku) errorMsg = `SKU: ${errorData.sku[0]}`;
+        else if (errorData.category) errorMsg = `Category: ${errorData.category[0]}`;
+        else if (errorData.name) errorMsg = `Name: ${errorData.name[0]}`;
+        else if (errorData.uom) errorMsg = `UOM: ${errorData.uom[0]}`;
+        else if (errorData.message) errorMsg = errorData.message;
+        else if (errorData.error) errorMsg = errorData.error;
+        else if (errorData.detail) errorMsg = errorData.detail;
+      }
+      
+      console.error('Create inventory item error:', errorData);
+      alert(errorMsg);
     },
   });
 

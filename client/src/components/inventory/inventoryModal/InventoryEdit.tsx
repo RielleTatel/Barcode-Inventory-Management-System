@@ -187,26 +187,35 @@ const InventoryEdit = ({ inventoryItem: _inventoryItem, onChange, formData }: In
           </div>
           {showCategoryDropdown && !categoriesLoading && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-              <div
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${formData.category_name === 'Raw Materials' ? 'bg-amber-50 border-l-4 border-amber-500' : 'hover:bg-gray-50'}`}
-                onClick={(e) => { e.stopPropagation(); const cat = categories.find(c => c.name === 'Raw Materials'); handleCategorySelect(cat?.id || 1, 'Raw Materials'); }}
-              >
-                <Package className="w-5 h-5 text-amber-600" />
-                <div>
-                  <p className="font-medium text-gray-900">Raw Materials</p>
-                  <p className="text-xs text-gray-500">Ingredients and supplies for production</p>
+              {categories.map(cat => (
+                <div
+                  key={cat.id}
+                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
+                    formData.category === cat.id
+                      ? cat.name === 'Raw Materials'
+                        ? 'bg-amber-50 border-l-4 border-amber-500'
+                        : 'bg-emerald-50 border-l-4 border-emerald-500'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={(e) => { e.stopPropagation(); handleCategorySelect(cat.id, cat.name); }}
+                >
+                  {cat.name === 'Raw Materials' ? (
+                    <Package className="w-5 h-5 text-amber-600" />
+                  ) : (
+                    <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
+                  )}
+                  <div>
+                    <p className="font-medium text-gray-900">{cat.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {cat.name === 'Raw Materials'
+                        ? 'Ingredients and supplies for production'
+                        : cat.name === 'Prepared Items'
+                        ? 'Menu items ready for serving'
+                        : `${cat.items_count} items`}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${formData.category_name === 'Prepared Items' ? 'bg-emerald-50 border-l-4 border-emerald-500' : 'hover:bg-gray-50'}`}
-                onClick={(e) => { e.stopPropagation(); const cat = categories.find(c => c.name === 'Prepared Items'); handleCategorySelect(cat?.id || 2, 'Prepared Items'); }}
-              >
-                <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
-                <div>
-                  <p className="font-medium text-gray-900">Prepared Items</p>
-                  <p className="text-xs text-gray-500">Menu items ready for serving</p>
-                </div>
-              </div>
+              ))}
             </div>
           )}
         </div>
