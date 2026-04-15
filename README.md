@@ -134,21 +134,6 @@ docker compose up --build
 
 Services:
 
-- Backend: `http://localhost:8000`
-- PostgreSQL: `localhost:5432`
-- pgAdmin: `http://localhost:5050`
-
-### Frontend (optional local dev flow)
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-Default frontend URL:
-
-- `http://localhost:5173`
 
 ## Repository Structure
 
@@ -159,8 +144,3 @@ Default frontend URL:
 ├── documentation/    # UI screenshots used in this README
 └── docker-compose.yml
 ```
-
-## Notes
-
-- This README is intended as a technical overview of the system modules, architecture, and pages.
-- For implementation-level details, inspect module code under `backend/apps/` and `client/src/`.
